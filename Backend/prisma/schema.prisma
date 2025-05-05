@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -15,11 +14,81 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   citizenId String   @unique
   email     String  @unique
   phone     String  @unique
-  password  String?
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  voteParticipants VoteParticipant[]
+}
+
+model Supervisor {
+  id        String   @id @default(uuid())
+  username String   @unique
+  password String 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  voteSessions VoteSession[]
+}
+
+model Signer {
+  id        String   @id @default(uuid())
+  username String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  voteSessions VoteSession[]
+}
+
+model VoteSession {
+  id        String   @id @default(uuid())
+  supervisorId String
+  supervisor Supervisor @relation(fields: [supervisorId], references: [id])
+  signerId String
+  signer Signer @relation(fields: [signerId], references: [id])
+  title     String
+  description String
+  endDate   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  voteParticipants VoteParticipant[]
+  votes     Vote[]
+  candidates Candidate[]
+}
+
+model VoteParticipant {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  voteSessionId String
+  voteSession VoteSession @relation(fields: [voteSessionId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([userId, voteSessionId], name: "unique_vote_participant")
+}
+
+
+model Vote {
+  id        String   @id @default(uuid())
+  voteSessionId String
+  voteSession VoteSession @relation(fields: [voteSessionId], references: [id])
+  key       String
+  isVoted   Boolean
+  voteAt    DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([voteSessionId, key], name: "unique_vote")
+}
+
+model Candidate {
+  id        String   @id @default(uuid())
+  voteSessionId String
+  voteSession VoteSession @relation(fields: [voteSessionId], references: [id])
+  name      String
+  description String
+  totalVotes Int @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
