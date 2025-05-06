@@ -8,26 +8,43 @@ import {
   UserSignInDto,
   UserSignUpDto,
 } from 'src/common/dto';
+import { Signer, Supervisor, User } from '@prisma/client';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('user/login')
-  async userLogin(data: UserSignInDto) {}
+  async userLogin(data: UserSignInDto): Promise<{ accessToken: string }> {
+    return this.authService.userLogin(data);
+  }
 
   @Post('user/register')
-  async userRegister(data: UserSignUpDto) {}
+  async userRegister(data: UserSignUpDto): Promise<User> {
+    return this.authService.userRegister(data);
+  }
 
   @Post('supervisor/login')
-  async supervisorLogin(data: SupervisorSignInDto) {}
+  async supervisorLogin(data: SupervisorSignInDto): Promise<{
+    accessToken: string;
+  }> {
+    return this.authService.supervisorLogin(data);
+  }
 
   @Post('supervisor/register')
-  async supervisorRegister(data: SupervisorSignUpDto) {}
+  async supervisorRegister(data: SupervisorSignUpDto): Promise<Supervisor> {
+    return this.authService.supervisorRegister(data);
+  }
 
   @Post('signer/login')
-  async signerLogin(data: SignerSignInDto) {}
+  async signerLogin(data: SignerSignInDto): Promise<{
+    accessToken: string;
+  }> {
+    return this.authService.signerLogin(data);
+  }
 
   @Post('signer/register')
-  async signerRegister(data: SignerSignUpDto) {}
+  async signerRegister(data: SignerSignUpDto): Promise<Signer> {
+    return this.authService.signerRegister(data);
+  }
 }

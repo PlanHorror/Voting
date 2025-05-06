@@ -18,6 +18,7 @@ import * as bcrypt from 'bcrypt';
 import { Payload } from 'src/common/interface';
 import { JwtService } from '@nestjs/jwt';
 import { Role } from 'src/common/enum';
+import { Signer, Supervisor, User } from '@prisma/client';
 @Injectable()
 export class AuthService {
   constructor(
@@ -93,15 +94,15 @@ export class AuthService {
 
   // Register methods
 
-  async userRegister(data: UserSignUpDto) {
+  async userRegister(data: UserSignUpDto): Promise<User> {
     return await this.userService.createUserService(data);
   }
 
-  async supervisorRegister(data: SupervisorSignUpDto) {
+  async supervisorRegister(data: SupervisorSignUpDto): Promise<Supervisor> {
     return await this.supervisorService.createSupervisor(data);
   }
 
-  async signerRegister(data: SignerSignUpDto) {
+  async signerRegister(data: SignerSignUpDto): Promise<Signer> {
     return await this.signerService.createSignerService(data);
   }
 }
