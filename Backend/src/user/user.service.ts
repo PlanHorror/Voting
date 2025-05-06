@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -97,8 +98,8 @@ export class UserService {
       });
       return user;
     } catch (error) {
-      if (error.code === 'P2023') {
-        throw error;
+      if (error.code === 'P2002') {
+        throw new ConflictException('User already exists');
       }
       throw new BadRequestException('Error creating user');
     }
@@ -136,6 +137,9 @@ export class UserService {
         });
       }
     } catch (error) {
+      if (error.code === 'P2002') {
+        throw new ConflictException('User already exists');
+      }
       throw new BadRequestException('Error updating user');
     }
   }

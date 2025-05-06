@@ -31,7 +31,7 @@ export class AuthService {
   // Generate access token
   async generateTokens(payload: Payload): Promise<{ accessToken: string }> {
     const accessToken = await this.jwtService.signAsync(payload, {
-      expiresIn: '1h',
+      expiresIn: '30d',
       secret: process.env.JWT_SECRET,
     });
     return { accessToken };

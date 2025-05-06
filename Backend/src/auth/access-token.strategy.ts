@@ -11,7 +11,7 @@ import { Payload } from 'src/common/interface';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
-export class JwtAccessTokenStrategy extends PassportStrategy(Strategy) {
+export class JwtAccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),

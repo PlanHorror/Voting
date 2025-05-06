@@ -50,6 +50,8 @@ model VoteSession {
   title     String
   description String
   endDate   DateTime
+  privateKey String
+  publicKey  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   voteParticipants VoteParticipant[]

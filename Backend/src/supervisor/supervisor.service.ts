@@ -71,7 +71,7 @@ export class SupervisorService {
       });
       return supervisor;
     } catch (error) {
-      if (error.code === 'P2023') {
+      if (error.code === 'P2002') {
         throw new BadRequestException('Username already exists');
       }
       throw new BadRequestException('Error creating supervisor');
@@ -106,7 +106,7 @@ export class SupervisorService {
         });
       }
     } catch (error) {
-      if (error.code === 'P2023') {
+      if (error.code === 'P2002') {
         throw new BadRequestException('Username already exists');
       }
       throw new BadRequestException('Error creating supervisor');

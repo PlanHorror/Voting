@@ -1,4 +1,4 @@
-import { Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
   SignerSignInDto,
@@ -15,36 +15,40 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('user/login')
-  async userLogin(data: UserSignInDto): Promise<{ accessToken: string }> {
+  async userLogin(
+    @Body() data: UserSignInDto,
+  ): Promise<{ accessToken: string }> {
     return this.authService.userLogin(data);
   }
 
   @Post('user/register')
-  async userRegister(data: UserSignUpDto): Promise<User> {
+  async userRegister(@Body() data: UserSignUpDto): Promise<User> {
     return this.authService.userRegister(data);
   }
 
   @Post('supervisor/login')
-  async supervisorLogin(data: SupervisorSignInDto): Promise<{
+  async supervisorLogin(@Body() data: SupervisorSignInDto): Promise<{
     accessToken: string;
   }> {
     return this.authService.supervisorLogin(data);
   }
 
   @Post('supervisor/register')
-  async supervisorRegister(data: SupervisorSignUpDto): Promise<Supervisor> {
+  async supervisorRegister(
+    @Body() data: SupervisorSignUpDto,
+  ): Promise<Supervisor> {
     return this.authService.supervisorRegister(data);
   }
 
   @Post('signer/login')
-  async signerLogin(data: SignerSignInDto): Promise<{
+  async signerLogin(@Body() data: SignerSignInDto): Promise<{
     accessToken: string;
   }> {
     return this.authService.signerLogin(data);
   }
 
   @Post('signer/register')
-  async signerRegister(data: SignerSignUpDto): Promise<Signer> {
+  async signerRegister(@Body() data: SignerSignUpDto): Promise<Signer> {
     return this.authService.signerRegister(data);
   }
 }

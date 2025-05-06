@@ -65,8 +65,9 @@ export class SignerService {
       });
       return signer;
     } catch (error) {
-      if (error.code === 'P2023') {
-        throw error;
+      console.log(error);
+      if (error.code === 'P2002') {
+        throw new ConflictException('Username already exists');
       }
       throw new BadRequestException('Error creating signer');
     }
@@ -103,8 +104,8 @@ export class SignerService {
         return signer;
       }
     } catch (error) {
-      if (error.code === 'P2023') {
-        throw error;
+      if (error.code === 'P2002') {
+        throw new ConflictException('Username already exists');
       }
       throw new BadRequestException('Error updating signer');
     }
@@ -115,9 +116,6 @@ export class SignerService {
         where: { id },
       });
     } catch (error) {
-      if (error.code === 'P2023') {
-        throw error;
-      }
       throw new BadRequestException('Error deleting signer');
     }
   }
