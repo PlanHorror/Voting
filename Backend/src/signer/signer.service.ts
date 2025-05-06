@@ -126,7 +126,7 @@ export class SignerService {
    * Service method
    */
 
-  async newSignerService(data: SignerSignUpDto): Promise<Signer> {
+  async createSignerService(data: SignerSignUpDto): Promise<Signer> {
     if (!data) {
       throw new BadRequestException('Not enough data provided');
     }

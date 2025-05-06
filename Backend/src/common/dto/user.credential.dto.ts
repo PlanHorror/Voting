@@ -6,7 +6,7 @@ export class UserSignUpDto {
 
   @IsNotEmpty()
   @IsPhoneNumber('VN')
-  phoneNumber: string;
+  phone: string;
 
   @IsNotEmpty()
   @IsString()
@@ -21,4 +21,26 @@ export class UserSignInDto {
   @IsNotEmpty()
   @IsString()
   password: string;
+}
+
+export class UserUpdateDto {
+  @IsNotEmpty()
+  @IsString()
+  citizenId: string;
+
+  @IsNotEmpty()
+  @IsPhoneNumber('VN')
+  phone: string;
+
+  @IsNotEmpty()
+  @IsString()
+  old_password: string;
+
+  @IsNotEmpty()
+  @IsString()
+  new_password: string;
+
+  @IsNotEmpty()
+  @IsString()
+  confirm_password: string;
 }
