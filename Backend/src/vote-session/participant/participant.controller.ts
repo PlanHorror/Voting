@@ -13,7 +13,7 @@ import { Role } from 'src/common/enum';
 import { GetUser } from 'src/common/decorator/getuser.decorator';
 import { Signer, Supervisor, User } from '@prisma/client';
 
-@Controller('participant')
+@Controller('session/participant')
 export class ParticipantController {
   constructor(private participantService: ParticipantService) {}
 
@@ -22,7 +22,7 @@ export class ParticipantController {
     return await this.participantService.getAllParticipant();
   }
 
-  @Get('vote-session/:id')
+  @Get('session/:id')
   @UseGuards(AuthGuard('jwt'), new RoleGuard([Role.SUPERVISOR, Role.SIGNER]))
   async getAllParticipantByVoteSessionId(
     @Param('id') id: string,
@@ -48,7 +48,7 @@ export class ParticipantController {
   //   );
   // }
 
-  @Post('vote-session/:id')
+  @Post('session/:id')
   @UseGuards(AuthGuard('jwt'), new RoleGuard([Role.USER]))
   async createParticipant(
     @Param('id') id: string,
@@ -61,14 +61,15 @@ export class ParticipantController {
   }
 
   @Delete(':id')
-  @UseGuards(AuthGuard('jwt'), new RoleGuard([Role.SIGNER]))
+  @UseGuards(AuthGuard('jwt'), new RoleGuard([Role.SIGNER, Role.SUPERVISOR]))
   async deleteParticipant(
     @Param('id') id: string,
-    @GetUser() userData: { user: Signer; role: Role },
+    @GetUser() userData: { user: Signer | Supervisor; role: Role },
   ) {
     return await this.participantService.deleteParticipantService(
       id,
       userData.user.id,
+      userData.role,
     );
   }
 }

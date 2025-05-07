@@ -7,12 +7,16 @@ import { VoteSessionService } from '../vote-session.service';
 import { PrismaService } from 'src/prisma.service';
 import { VoteParticipant } from '@prisma/client';
 import { Role } from 'src/common/enum';
-
+import { VotesService } from '../votes/votes.service';
+import { UserService } from 'src/user/user.service';
+import * as bcrypt from 'bcrypt';
 @Injectable()
 export class ParticipantService {
   constructor(
     private voteSessionService: VoteSessionService,
     private prismaService: PrismaService,
+    private votesService: VotesService,
+    private userService: UserService,
   ) {}
 
   /*
@@ -77,14 +81,19 @@ export class ParticipantService {
     }
 
     try {
-      return await this.prismaService.voteParticipant.findUnique({
+      const participant = await this.prismaService.voteParticipant.findUnique({
         where: {
           id,
         },
         include: {
           user: true,
+          voteSession: true,
         },
       });
+      if (!participant) {
+        throw new NotFoundException('Participant not found');
+      }
+      return participant;
     } catch (error) {
       throw new NotFoundException('Participant not found');
     }
@@ -180,24 +189,51 @@ export class ParticipantService {
   async createParticipantService(
     userId: string,
     voteSessionId: string,
-  ): Promise<VoteParticipant> {
+  ): Promise<{ key: string }> {
     if (!userId || !voteSessionId) {
       throw new BadRequestException('Not enough data provided');
     }
-    return await this.createParticipant(userId, voteSessionId);
+    const voteSession =
+      await this.voteSessionService.getVoteSessionById(voteSessionId);
+    const user = await this.userService.findUserById(userId);
+    const now = new Date();
+    if (voteSession.endDate < now) {
+      throw new BadRequestException('Vote session has ended');
+    }
+
+    await this.createParticipant(userId, voteSessionId);
+    const key = await bcrypt.hash(user.citizenId, 10);
+    await this.votesService.createVote({
+      key,
+      voteSessionId: voteSession.id,
+    });
+    return { key };
   }
 
   async deleteParticipantService(
     id: string,
-    signerId: string,
-  ): Promise<VoteParticipant> {
-    if (!id || !signerId) {
+    userid: string,
+    role: Role,
+  ): Promise<void> {
+    if (!id || !userid || (!role && role !== Role.SUPERVISOR)) {
       throw new BadRequestException('Not enough data provided');
     }
-    const voteSession = await this.voteSessionService.getVoteSessionById(id);
-    if (voteSession.signerId !== signerId) {
-      throw new BadRequestException('You are not allowed to access this data');
+    const participant = await this.getParticipantById(id);
+    if (role === Role.SUPERVISOR) {
+      if (participant.voteSession.supervisorId !== userid) {
+        throw new BadRequestException(
+          'You are not allowed to delete this participant',
+        );
+      }
     }
-    return await this.deleteParticipant(id);
+    if (role === Role.SIGNER) {
+      if (participant.voteSession.signerId !== userid) {
+        throw new BadRequestException(
+          'You are not allowed to delete this participant',
+        );
+      }
+    }
+
+    await this.deleteParticipant(id);
   }
 }

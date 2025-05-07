@@ -6,19 +6,29 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { VoteSessionService } from '../vote-session.service';
-import { VoteDto } from 'src/common/dto/vote.dto';
+import { UseVoteDto, VoteDto } from 'src/common/dto/vote.dto';
+import { CandidatesService } from '../candidates/candidates.service';
+import { Console } from 'console';
+import { Vote } from '@prisma/client';
+import {
+  blindedMessage,
+  unblindMessage,
+  verifyBlindSignature,
+} from 'src/common/utils';
+import { signBlindedMessage } from 'src/common/utils/sign.util';
 
 @Injectable()
 export class VotesService {
   constructor(
     private prismaService: PrismaService,
     private voteSessionService: VoteSessionService,
+    private candidateService: CandidatesService,
   ) {}
 
   /*
    * Raw method
    */
-  async getAllVotes() {
+  async getAllVotes(): Promise<Vote[]> {
     return await this.prismaService.vote.findMany({
       include: {
         voteSession: true,
@@ -26,7 +36,7 @@ export class VotesService {
     });
   }
 
-  async getVotesByVoteSessionId(voteSessionId: string) {
+  async getVotesByVoteSessionId(voteSessionId: string): Promise<Vote[]> {
     if (!voteSessionId) {
       throw new BadRequestException('Not enough data provided');
     }
@@ -46,12 +56,12 @@ export class VotesService {
     }
   }
 
-  async getVoteById(id: string) {
+  async getVoteById(id: string): Promise<Vote> {
     if (!id) {
       throw new BadRequestException('Not enough data provided');
     }
     try {
-      return await this.prismaService.vote.findUnique({
+      const vote = await this.prismaService.vote.findUnique({
         where: {
           id: id,
         },
@@ -59,12 +69,38 @@ export class VotesService {
           voteSession: true,
         },
       });
+      if (!vote) {
+        throw new NotFoundException('Vote not found');
+      }
+      return vote;
     } catch (error) {
       throw new Error('Vote not found');
     }
   }
 
-  async createVote(data: VoteDto) {
+  async getVoteByKey(key: string): Promise<Vote> {
+    if (!key) {
+      throw new BadRequestException('Not enough data provided');
+    }
+    try {
+      const vote = await this.prismaService.vote.findFirst({
+        where: {
+          key: key,
+        },
+        include: {
+          voteSession: true,
+        },
+      });
+      if (!vote) {
+        throw new NotFoundException('Vote not found');
+      }
+      return vote;
+    } catch (error) {
+      throw new NotFoundException('Vote not found');
+    }
+  }
+
+  async createVote(data: VoteDto): Promise<Vote> {
     try {
       const voteSession = await this.voteSessionService.getVoteSessionById(
         data.voteSessionId,
@@ -79,12 +115,13 @@ export class VotesService {
       if (error.code === 'P2002') {
         throw new ConflictException('Vote already exists');
       } else {
+        console.error(error);
         throw new BadRequestException('Failed to create vote');
       }
     }
   }
 
-  async updateVote(id: string, voteData: VoteDto) {
+  async updateVote(id: string, voteData: VoteDto): Promise<Vote> {
     try {
       return await this.prismaService.vote.update({
         where: {
@@ -100,9 +137,24 @@ export class VotesService {
     }
   }
 
-  async deleteVote(id: string) {
+  async changeVoteStatus(id: string, status: boolean): Promise<Vote> {
     try {
-      return await this.prismaService.vote.delete({
+      return await this.prismaService.vote.update({
+        where: {
+          id: id,
+        },
+        data: {
+          isVoted: status,
+        },
+      });
+    } catch (error) {
+      throw new BadRequestException('Failed to change vote status');
+    }
+  }
+
+  async deleteVote(id: string): Promise<void> {
+    try {
+      await this.prismaService.vote.delete({
         where: {
           id: id,
         },
@@ -112,9 +164,9 @@ export class VotesService {
     }
   }
 
-  async deleteVotesByVoteSessionId(voteSessionId: string) {
+  async deleteVotesByVoteSessionId(voteSessionId: string): Promise<void> {
     try {
-      return await this.prismaService.vote.deleteMany({
+      await this.prismaService.vote.deleteMany({
         where: {
           voteSessionId: voteSessionId,
         },
@@ -124,7 +176,73 @@ export class VotesService {
     }
   }
 
+  async useVoted(data: UseVoteDto, voteSessionId: string) {
+    try {
+      const voteSession =
+        await this.voteSessionService.getVoteSessionById(voteSessionId);
+      const candidate = await this.candidateService.findCandidateByHashId(
+        data.candidateIdHash,
+      );
+      return await this.prismaService.vote.update({
+        where: {
+          id: voteSession.id,
+        },
+        data: {
+          isVoted: true,
+          candidateId: candidate.id,
+          voteAt: new Date(),
+        },
+      });
+    } catch (error) {
+      throw new NotFoundException('Vote session not found');
+    }
+  }
+
   /*
    * Service method
    */
+
+  async voteService(data: UseVoteDto, voteSessionId: string) {
+    const voteSession =
+      await this.voteSessionService.getVoteSessionById(voteSessionId);
+    const candidate = await this.candidateService.findCandidateByHashId(
+      data.candidateIdHash,
+    );
+    const vote = await this.getVoteByKey(data.key);
+    const now = new Date();
+    if (voteSession.id !== vote.voteSessionId) {
+      throw new ConflictException('Vote session not found');
+    }
+    if (vote.isVoted || candidate.voteSessionId !== voteSession.id) {
+      throw new ConflictException('Vote invalid or already used');
+    }
+    if (voteSession.endDate < now) {
+      throw new ConflictException('Vote session is not active');
+    }
+    const { blindMessage, blindingFactor, hashMessage } = blindedMessage(
+      data.candidateIdHash,
+      voteSession.publicKey,
+    );
+    const messageSignature = signBlindedMessage(
+      blindMessage,
+      voteSession.privateKey,
+    );
+    const unblindMessages = unblindMessage(
+      messageSignature,
+      blindingFactor,
+      voteSession.publicKey,
+    );
+    const verifyBlindSignatures = verifyBlindSignature(
+      unblindMessages,
+      hashMessage,
+      voteSession.publicKey,
+    );
+    if (!verifyBlindSignatures) {
+      throw new ConflictException('Vote invalid or already used');
+    }
+    await this.useVoted(data, voteSessionId);
+    await this.candidateService.changeVoteCount(candidate.id, 1);
+    console.log(verifyBlindSignatures);
+    console.log('voteService', data, voteSessionId);
+  }
 }

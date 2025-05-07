@@ -2,10 +2,10 @@ import * as crypto from 'crypto';
 import * as forge from 'node-forge';
 const bigInt = forge.jsbn.BigInteger;
 
-export function blindMessage(
+export function blindedMessage(
   message: string,
   publicKey: string,
-): { blindMessage: string; blindingFactor: string } {
+): { blindMessage: string; blindingFactor: string; hashMessage: string } {
   const hashMessage = crypto.createHash('sha256').update(message).digest();
   const n = new bigInt(
     forge.pki.publicKeyFromPem(publicKey).n.toString(16),
@@ -23,6 +23,7 @@ export function blindMessage(
   return {
     blindMessage: mBigInt.multiply(r.modPow(e, n)).mod(n).toString(16),
     blindingFactor: r.toString(16),
+    hashMessage: hashMessage.toString('hex'),
   };
 }
 

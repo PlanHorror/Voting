@@ -75,9 +75,9 @@ model Vote {
   id        String   @id @default(uuid())
   voteSessionId String
   voteSession VoteSession @relation(fields: [voteSessionId], references: [id])
-  candidateId String  
-  candidate Candidate @relation(fields: [candidateId], references: [id])
-  key       String
+  candidateId String?  
+  candidate Candidate? @relation(fields: [candidateId], references: [id], onDelete: SetNull)
+  key       String @unique
   isVoted   Boolean @default(false)
   voteAt    DateTime?
   createdAt DateTime @default(now())
@@ -87,6 +87,7 @@ model Vote {
 
 model Candidate {
   id        String   @id @default(uuid())
+  hashId   String?   @unique 
   voteSessionId String
   voteSession VoteSession @relation(fields: [voteSessionId], references: [id])
   name      String

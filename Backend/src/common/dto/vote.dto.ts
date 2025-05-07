@@ -12,15 +12,15 @@ export class VoteDto {
   @IsNotEmpty()
   voteSessionId: string;
 
-  @IsUUID()
+  @IsString()
   @IsNotEmpty()
-  candidateId: string;
+  key: string;
+}
 
-  @IsBoolean()
+export class UseVoteDto {
+  @IsString()
   @IsNotEmpty()
-  @IsOptional()
-  @Transform(({ value }) => value === 'true')
-  isVoted: boolean;
+  candidateIdHash: string;
 
   @IsString()
   @IsNotEmpty()

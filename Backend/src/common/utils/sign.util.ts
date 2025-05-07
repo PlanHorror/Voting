@@ -1,16 +1,11 @@
-import crypto from 'crypto';
-export function signMessage(
+import * as forge from 'node-forge';
+const bigInt = forge.jsbn.BigInteger;
+export function signBlindedMessage(
   message: string,
   privateKey: string,
-): { signedMessage: string; signature: Buffer } {
-  const buffer = Buffer.from(message);
-  const keyBuffer = Buffer.from(privateKey, 'base64');
-  const signature = crypto.sign('sha256', buffer, {
-    key: keyBuffer,
-    padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
-  });
-  return {
-    signedMessage: buffer.toString('base64'),
-    signature,
-  };
+): string {
+  const n = forge.pki.privateKeyFromPem(privateKey).n;
+  const d = forge.pki.privateKeyFromPem(privateKey).d;
+  const processMessage = new bigInt(message, 16);
+  return processMessage.modPow(d, n).toString(16);
 }

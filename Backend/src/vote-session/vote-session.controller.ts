@@ -16,7 +16,7 @@ import { GetUser } from 'src/common/decorator/getuser.decorator';
 import { Supervisor } from '@prisma/client';
 import { VoteSessionCreateDto } from 'src/common/dto/vote-session.dto';
 
-@Controller('vote-session')
+@Controller('session')
 export class VoteSessionController {
   constructor(private voteSessionService: VoteSessionService) {}
 

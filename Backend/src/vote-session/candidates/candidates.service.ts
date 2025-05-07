@@ -11,7 +11,7 @@ import {
 import { PrismaService } from 'src/prisma.service';
 import { VoteSessionService } from '../vote-session.service';
 import { Candidate } from '@prisma/client';
-
+import * as bcrypt from 'bcrypt';
 @Injectable()
 export class CandidatesService {
   constructor(
@@ -36,6 +36,23 @@ export class CandidatesService {
     try {
       const candidate = await this.prismaService.candidate.findUnique({
         where: { id },
+        include: {
+          voteSession: true,
+        },
+      });
+      if (!candidate) {
+        throw new NotFoundException('Candidate not found');
+      }
+      return candidate;
+    } catch (error) {
+      throw new NotFoundException('Candidate not found');
+    }
+  }
+
+  async findCandidateByHashId(hashId: string) {
+    try {
+      const candidate = await this.prismaService.candidate.findUnique({
+        where: { hashId },
         include: {
           voteSession: true,
         },
@@ -92,6 +109,11 @@ export class CandidatesService {
           voteSessionId,
         },
       });
+      const hashId = await bcrypt.hash(candidate.id, 10);
+      await this.prismaService.candidate.update({
+        where: { id: candidate.id },
+        data: { hashId },
+      });
       return candidate;
     } catch (error) {
       throw new BadRequestException('Error creating candidate');
@@ -122,6 +144,22 @@ export class CandidatesService {
       return candidate;
     } catch (error) {
       throw new BadRequestException('Error deleting candidate');
+    }
+  }
+
+  async changeVoteCount(id: string, change: number) {
+    try {
+      const candidate = await this.prismaService.candidate.update({
+        where: { id },
+        data: {
+          totalVotes: {
+            increment: change,
+          },
+        },
+      });
+      return candidate;
+    } catch (error) {
+      throw new BadRequestException('Error increasing vote count');
     }
   }
 

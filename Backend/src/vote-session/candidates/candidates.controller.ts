@@ -16,7 +16,7 @@ import { Supervisor } from '@prisma/client';
 import { Role } from 'src/common/enum';
 import { CandidateDto } from 'src/common/dto/candidate.dto';
 
-@Controller('vote-session/candidates')
+@Controller('session/candidates')
 export class CandidatesController {
   constructor(private candidateService: CandidatesService) {}
 
