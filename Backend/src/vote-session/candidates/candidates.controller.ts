@@ -47,17 +47,17 @@ export class CandidatesController {
     );
   }
 
-  // @Get('vote-session/:id')
-  // @UseGuards(AuthGuard('jwt'), new RoleGuard([Role.SUPERVISOR]))
-  // async getCandidatesByVoteSessionId(
-  //   @GetUser() userData: { user: Supervisor; role: Role },
-  //   @Param('id') id: string,
-  // ) {
-  //   return await this.candidateService.findCandidatesByVoteSessionId(
-  //     id,
-  //     userData.user.id,
-  //   );
-  // }
+  @Get('vote-session/:id')
+  @UseGuards(AuthGuard('jwt'), new RoleGuard([Role.SUPERVISOR]))
+  async getCandidatesByVoteSessionId(
+    @GetUser() userData: { user: Supervisor; role: Role },
+    @Param('id') id: string,
+  ) {
+    return await this.candidateService.findCandidatesByVoteSessionIdService(
+      id,
+      userData.user.id,
+    );
+  }
 
   @Post()
   @UseGuards(AuthGuard('jwt'), new RoleGuard([Role.SUPERVISOR]))

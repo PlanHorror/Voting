@@ -11,6 +11,6 @@ import { SupervisorModule } from 'src/supervisor/supervisor.module';
 @Module({
   controllers: [VoteSessionController],
   providers: [VoteSessionService, PrismaService],
-  imports: [ParticipantModule, VotesModule, SignerModule, SupervisorModule],
+  imports: [SignerModule, SupervisorModule],
 })
 export class VoteSessionModule {}

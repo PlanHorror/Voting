@@ -75,8 +75,10 @@ model Vote {
   id        String   @id @default(uuid())
   voteSessionId String
   voteSession VoteSession @relation(fields: [voteSessionId], references: [id])
+  candidateId String  
+  candidate Candidate @relation(fields: [candidateId], references: [id])
   key       String
-  isVoted   Boolean
+  isVoted   Boolean @default(false)
   voteAt    DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -92,4 +94,5 @@ model Candidate {
   totalVotes Int @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  votes     Vote[]
 }
