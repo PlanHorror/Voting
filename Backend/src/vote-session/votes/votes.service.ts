@@ -176,25 +176,21 @@ export class VotesService {
     }
   }
 
-  async useVoted(data: UseVoteDto, voteSessionId: string) {
+  async useVoted(voteId: string, candidateId: string): Promise<Vote> {
     try {
-      const voteSession =
-        await this.voteSessionService.getVoteSessionById(voteSessionId);
-      const candidate = await this.candidateService.findCandidateByHashId(
-        data.candidateIdHash,
-      );
       return await this.prismaService.vote.update({
         where: {
-          id: voteSession.id,
+          id: voteId,
         },
         data: {
           isVoted: true,
-          candidateId: candidate.id,
+          candidateId: candidateId,
           voteAt: new Date(),
         },
       });
     } catch (error) {
-      throw new NotFoundException('Vote session not found');
+      console.error(error);
+      throw new BadRequestException('Failed to use vote');
     }
   }
 
@@ -240,7 +236,7 @@ export class VotesService {
     if (!verifyBlindSignatures) {
       throw new ConflictException('Vote invalid or already used');
     }
-    await this.useVoted(data, voteSessionId);
+    await this.useVoted(vote.id, candidate.id);
     await this.candidateService.changeVoteCount(candidate.id, 1);
     console.log(verifyBlindSignatures);
     console.log('voteService', data, voteSessionId);
