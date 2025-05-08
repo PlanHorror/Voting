@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function NavBar() {
   return (
-    <div className="w-full mb-20">
+    <div className="w-full mb-10">
       <nav className="flex items-center justify-between px-4 py-2 bg-white shadow-md">
         <div className="w-1/4 p-5">
           <h1 className="text-2xl font-bold text-indigo-500">Voting System</h1>
