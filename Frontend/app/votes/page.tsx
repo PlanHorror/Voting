@@ -74,7 +74,7 @@ export default function VoteListPage() {
                   Take Key
                 </button>
                 <Link
-                  className="flex items-center gap-2 px-4 py-2 border border-green-600 text-green-700 rounded hover:bg-green-50 transition duration-150"
+                  className="flex items-center gap-2 px-4 py-2 border border-green-600 text-green-700 rounded transition duration-150 hover:bg-green-200"
                   href={`/votes/${vote.id}`}>
                   <svg
                     className="w-4 h-4"
