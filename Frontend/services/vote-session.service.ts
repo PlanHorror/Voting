@@ -4,8 +4,9 @@ import {
   VoteParticipantDto,
   VoteParticipantKeyDto,
 } from "../dto/vote-participants.dto";
-import CandidateDto from "../dto/candidate.dto";
+import { CandidateDto } from "../dto/candidate.dto";
 import { AuthService } from "./auth.service";
+import { VoteDto } from "@/dto/vote.dto";
 
 export class VoteSessionService {
   private static BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -181,9 +182,11 @@ export class VoteSessionService {
   }
 
   // Vote operations
-  static async getAllVotes(): Promise<any[]> {
+  static async getAllVotes(): Promise<VoteDto[]> {
     try {
-      const response = await axios.get<any[]>(`${this.BACKEND_URL}/votes/all`);
+      const response = await axios.get<VoteDto[]>(
+        `${this.BACKEND_URL}/votes/all`
+      );
       return response.data;
     } catch (error: unknown) {
       console.error("Error fetching all votes:", error);
@@ -191,9 +194,11 @@ export class VoteSessionService {
     }
   }
 
-  static async getVotesByVoteSessionId(voteSessionId: string): Promise<any[]> {
+  static async getVotesByVoteSessionId(
+    voteSessionId: string
+  ): Promise<VoteDto[]> {
     try {
-      const response = await axios.get<any[]>(
+      const response = await axios.get<VoteDto[]>(
         `${this.BACKEND_URL}/votes/session/${voteSessionId}`
       );
       return response.data;
@@ -208,16 +213,15 @@ export class VoteSessionService {
 
   static async castVote(
     voteSessionId: string,
-    candidateId: string,
+    candidateIdHash: string,
     key: string
   ): Promise<void> {
     try {
       await axios.post(`${this.BACKEND_URL}/votes/session/${voteSessionId}`, {
-        candidateIdHash: candidateId,
+        candidateIdHash: candidateIdHash,
         key: key,
       });
     } catch (error: unknown) {
-      console.error("Error casting vote:", error);
       throw error;
     }
   }
@@ -236,10 +240,6 @@ export class VoteSessionService {
       );
       return response.data;
     } catch (error: unknown) {
-      console.error(
-        `Error getting vote participant key for session ${voteSessionId}:`,
-        error
-      );
       throw error;
     }
   }

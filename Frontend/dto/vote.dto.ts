@@ -8,3 +8,8 @@ export interface VoteDto {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface NewVoteDto {
+  candidateIdHash: string;
+  key: string;
+}

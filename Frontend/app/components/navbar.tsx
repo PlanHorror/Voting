@@ -23,8 +23,12 @@ export default function NavBar() {
     // Listen for storage events (for when user logs in/out in another tab)
     window.addEventListener("storage", checkAuth);
 
+    // Listen for our custom auth change event
+    window.addEventListener("authChange", checkAuth);
+
     return () => {
       window.removeEventListener("storage", checkAuth);
+      window.removeEventListener("authChange", checkAuth);
     };
   }, []);
 
@@ -40,11 +44,11 @@ export default function NavBar() {
     <div className="w-full mb-10">
       <Toaster position="top-right" richColors />
       <nav className="flex items-center justify-between px-4 py-2 bg-white shadow-md">
-        <div className="w-1/4 p-5">
+        <div className="w-1/5 p-5">
           <h1 className="text-2xl font-bold text-indigo-500">Voting System</h1>
         </div>
 
-        <div className="flex justify-center space-x-8 text-lg font-medium">
+        <div className="flex justify-center space-x-8 text-lg font-medium w-3/5">
           <Link
             href="/"
             className="text-indigo-500 hover:text-blue-500 px-3 py-2">
@@ -71,12 +75,12 @@ export default function NavBar() {
           {!isAuthenticated ? (
             <>
               <Link
-                href="/auth/login"
+                href="/login"
                 className="px-5 py-2 border border-indigo-500 text-indigo-500 font-medium rounded-md hover:bg-indigo-500 hover:text-white transition-colors">
                 Login
               </Link>
               <Link
-                href="/auth/register"
+                href="/register"
                 className="px-5 py-2 bg-indigo-500 text-white font-medium rounded-md hover:bg-indigo-600 transition-colors">
                 Register
               </Link>

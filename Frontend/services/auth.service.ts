@@ -44,7 +44,7 @@ export class AuthService {
         data
       );
 
-      this.saveToken(response.data.accessToken, "USER");
+      this.saveTokenData(response.data.accessToken, "USER");
       this.decodeAndLogToken(response.data.accessToken);
       return response.data;
     } catch (error: unknown) {
@@ -132,6 +132,46 @@ export class AuthService {
     }
   }
 
+  private static saveTokenData(token: string, role: string): void {
+    if (typeof window !== "undefined") {
+      try {
+        // Decode the token to extract user ID
+        const tokenParts = token.split(".");
+        if (tokenParts.length === 3) {
+          const payload = JSON.parse(atob(tokenParts[1]));
+
+          // Save to localStorage
+          localStorage.setItem("accessToken", token);
+          localStorage.setItem("userRole", role);
+          localStorage.setItem("userId", payload.id || "");
+
+          // Set cookies for middleware access
+          document.cookie = `accessToken=${token}; path=/; max-age=86400`;
+          document.cookie = `userRole=${role}; path=/; max-age=86400`;
+          document.cookie = `userId=${payload.id || ""}; path=/; max-age=86400`;
+        }
+      } catch (error) {
+        console.error("Error parsing token data:", error);
+        // Fallback to basic token storage
+        localStorage.setItem("accessToken", token);
+        localStorage.setItem("userRole", role);
+
+        // Set cookies for middleware access
+        document.cookie = `accessToken=${token}; path=/; max-age=86400`;
+        document.cookie = `userRole=${role}; path=/; max-age=86400`;
+      }
+    }
+    // Notify about auth change
+    this.notifyAuthChange();
+  }
+
+  private static notifyAuthChange(): void {
+    if (typeof window !== "undefined") {
+      // Dispatch a custom event that components can listen for
+      window.dispatchEvent(new Event("authChange"));
+    }
+  }
+
   static decodeAndLogToken(token: string): void {
     try {
       // Decode JWT token (no library needed for basic decoding)
@@ -159,6 +199,13 @@ export class AuthService {
     return null;
   }
 
+  static getUserId(): string | null {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("userId");
+    }
+    return null;
+  }
+
   static getUserRole(): string | null {
     if (typeof window !== "undefined") {
       return localStorage.getItem("userRole");
@@ -172,8 +219,17 @@ export class AuthService {
 
   static logout(): void {
     if (typeof window !== "undefined") {
+      // Clear localStorage
       localStorage.removeItem("accessToken");
       localStorage.removeItem("userRole");
+      localStorage.removeItem("userId");
+
+      // Clear cookies
+      document.cookie = "accessToken=; path=/; max-age=0";
+      document.cookie = "userRole=; path=/; max-age=0";
+      document.cookie = "userId=; path=/; max-age=0";
     }
+    // Notify about auth change
+    this.notifyAuthChange();
   }
 }

@@ -5,7 +5,6 @@ export class UserSignUpDto {
   citizenId: string;
 
   @IsNotEmpty()
-  @IsPhoneNumber('VN')
   phone: string;
 
   @IsNotEmpty()
