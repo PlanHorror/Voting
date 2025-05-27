@@ -13,7 +13,7 @@ import { Role } from 'src/common/enum';
 import { GetUser } from 'src/common/decorator/getuser.decorator';
 import { Signer, Supervisor, User } from '@prisma/client';
 
-@Controller('session/participant')
+@Controller('participant')
 export class ParticipantController {
   constructor(private participantService: ParticipantService) {}
 

@@ -20,21 +20,30 @@ import { VoteSessionCreateDto } from 'src/common/dto/vote-session.dto';
 export class VoteSessionController {
   constructor(private voteSessionService: VoteSessionService) {}
 
+  @Get('all')
+  async getAllVoteSessions() {
+    return this.voteSessionService.getVoteSession();
+  }
+
   @Get()
   @UseGuards(AuthGuard('jwt'), new RoleGuard([Role.SUPERVISOR]))
   async getVoteSession(@GetUser() userData: { user: Supervisor; role: Role }) {
     return this.voteSessionService.getVoteSessionBySupervisorId(userData.user);
   }
 
-  @Get('find/:id')
-  @UseGuards(AuthGuard('jwt'), new RoleGuard([Role.SUPERVISOR]))
-  async getVoteSessionById(
-    @GetUser() userData: { user: Supervisor; role: Role },
-    @Param('id') id: string,
-  ) {
-    return this.voteSessionService.findVoteSessionById(id, userData.user);
-  }
+  // @Get('find/:id')
+  // @UseGuards(AuthGuard('jwt'), new RoleGuard([Role.SUPERVISOR]))
+  // async getVoteSessionById(
+  //   @GetUser() userData: { user: Supervisor; role: Role },
+  //   @Param('id') id: string,
+  // ) {
+  //   return this.voteSessionService.findVoteSessionById(id, userData.user);
+  // }
 
+  @Get('find/:id')
+  async getVoteSessionById(@Param('id') id: string) {
+    return this.voteSessionService.getVoteSessionById(id);
+  }
   @Post()
   @UseGuards(AuthGuard('jwt'), new RoleGuard([Role.SUPERVISOR]))
   async createVoteSession(

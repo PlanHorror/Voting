@@ -1,13 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, FormEvent } from "react";
 import Link from "next/link";
+import { AuthService } from "@/services/auth.service";
+import { useRouter } from "next/navigation";
+import { Toaster, toast } from "sonner";
 
 export default function LoginPage() {
   const [loginType, setLoginType] = useState<"user" | "supervisor" | "signer">(
     "user"
   );
   const [showPassword, setShowPassword] = useState(false);
+  const [identifier, setIdentifier] = useState(""); // citizenId or username
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const renderIDLabel = () => {
     switch (loginType) {
@@ -20,8 +27,64 @@ export default function LoginPage() {
     }
   };
 
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+
+    setLoading(true);
+
+    try {
+      let response;
+
+      switch (loginType) {
+        case "user":
+          response = await AuthService.userLogin({
+            citizenId: identifier,
+            password,
+          });
+          toast.success("User login successful");
+          break;
+        case "supervisor":
+          response = await AuthService.supervisorLogin({
+            username: identifier,
+            password,
+          });
+          toast.success("Supervisor login successful");
+          break;
+        case "signer":
+          response = await AuthService.signerLogin({
+            username: identifier,
+            password,
+          });
+          toast.success("Signer login successful");
+          break;
+      }
+
+      console.log("Login successful:", response);
+
+      // Redirect based on user type
+      // switch (loginType) {
+      //   case "user":
+      //     router.push("/dashboard/user");
+      //     break;
+      //   case "supervisor":
+      //     router.push("/dashboard/supervisor");
+      //     break;
+      //   case "signer":
+      //     router.push("/dashboard/signer");
+      //     break;
+      // }
+      router.push("/");
+    } catch (error: unkown) {
+      console.debug("Login error:", error);
+      toast.error("Wrong username or password");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="flex items-center justify-center  px-4">
+    <div className="flex items-center justify-center px-4">
+      <Toaster position="top-right" richColors />
       <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-lg">
         <h2 className="mb-4 text-2xl font-semibold text-center text-gray-900">
           {loginType === "user"
@@ -33,6 +96,7 @@ export default function LoginPage() {
 
         <div className="flex justify-center gap-2 mb-6">
           <button
+            type="button"
             onClick={() => setLoginType("user")}
             className={`px-3 py-1 rounded-full text-sm font-medium ${
               loginType === "user"
@@ -42,6 +106,7 @@ export default function LoginPage() {
             User
           </button>
           <button
+            type="button"
             onClick={() => setLoginType("supervisor")}
             className={`px-3 py-1 rounded-full text-sm font-medium ${
               loginType === "supervisor"
@@ -51,6 +116,7 @@ export default function LoginPage() {
             Supervisor
           </button>
           <button
+            type="button"
             onClick={() => setLoginType("signer")}
             className={`px-3 py-1 rounded-full text-sm font-medium ${
               loginType === "signer"
@@ -61,7 +127,7 @@ export default function LoginPage() {
           </button>
         </div>
 
-        <form>
+        <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label
               htmlFor="id"
@@ -71,6 +137,8 @@ export default function LoginPage() {
             <input
               type="text"
               id="id"
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
               autoComplete="username"
               aria-label={renderIDLabel()}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -88,6 +156,8 @@ export default function LoginPage() {
               <input
                 type={showPassword ? "text" : "password"}
                 id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
                 aria-label="Password"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -104,8 +174,11 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="w-full px-4 py-2 mt-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition duration-200">
-            Login
+            disabled={loading}
+            className={`w-full px-4 py-2 mt-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition duration-200 ${
+              loading ? "opacity-70 cursor-not-allowed" : ""
+            }`}>
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
