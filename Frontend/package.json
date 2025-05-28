@@ -12,6 +12,8 @@
     "@types/bcrypt": "^5.0.2",
     "axios": "^1.9.0",
     "clsx": "^2.1.1",
+    "echarts": "^5.6.0",
+    "echarts-for-react": "^3.0.2",
     "jwt-decode": "^4.0.0",
     "next": "15.3.1",
     "react": "^19.0.0",

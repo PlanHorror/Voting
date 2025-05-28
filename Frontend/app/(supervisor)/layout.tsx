@@ -11,12 +11,7 @@ export default function SupervisorLayout({
   return (
     <RoleProtected allowedRoles={[Role.SUPERVISOR.toString()]}>
       <main className="container mx-auto px-4 py-8">
-        <div className="bg-white shadow-md rounded-lg p-6">
-          <h1 className="text-2xl font-bold text-gray-800 mb-6">
-            Supervisor Dashboard
-          </h1>
-          {children}
-        </div>
+        <div className="bg-white shadow-md rounded-lg p-6">{children}</div>
       </main>
     </RoleProtected>
   );

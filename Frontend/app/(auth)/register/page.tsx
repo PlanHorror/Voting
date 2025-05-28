@@ -87,8 +87,6 @@ export default function RegisterPage() {
         router.push("/login");
       }, 2000);
     } catch (error: unknown) {
-      console.error("Registration error:", error);
-
       // Check for specific error status
       if (error.response && error.response.status === 409) {
         toast.error("Citizen ID or phone number already exists");

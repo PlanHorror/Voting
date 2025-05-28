@@ -53,7 +53,7 @@ export class AuthService {
     }
   }
 
-  static async userRegister(data: UserSignUpDto): Promise<any> {
+  static async userRegister(data: UserSignUpDto): Promise<void> {
     try {
       const response = await axios.post(
         `${this.BACKEND_URL}/auth/user/register`,

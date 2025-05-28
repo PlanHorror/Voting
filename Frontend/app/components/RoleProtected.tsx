@@ -19,9 +19,12 @@ export default function RoleProtected({
     const userRole = AuthService.getUserRole();
     setRole(userRole);
     setLoading(false);
-
+    console.log("User role:", userRole, "Allowed roles:", allowedRoles);
     // Show toast notification if user doesn't have required role
-    if (!loading && (!userRole || !allowedRoles.includes(userRole))) {
+    if (
+      !loading &&
+      ((!userRole && userRole !== "0") || !allowedRoles.includes(userRole))
+    ) {
       toast.error(
         "Access denied. You don't have permission to view this content.",
         {
@@ -37,7 +40,11 @@ export default function RoleProtected({
   }, [allowedRoles, loading, router]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex justify-center items-center h-96">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
   }
 
   if (!role || !allowedRoles.includes(role)) {
