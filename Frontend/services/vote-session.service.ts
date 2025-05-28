@@ -287,6 +287,7 @@ export class VoteSessionService {
         key: key,
       });
     } catch (error: unknown) {
+      // console.error(error);
       throw error;
     }
   }

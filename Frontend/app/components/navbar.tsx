@@ -50,22 +50,21 @@ export default function NavBar() {
         </div>
 
         <div className="flex justify-center space-x-8 text-lg font-medium w-3/5">
-          <Link
-            href="/"
-            className="text-indigo-500 hover:text-blue-500 px-3 py-2">
-            Home
-          </Link>
-
           {userRole === Role.SUPERVISOR.toString() ? (
             // Supervisor Navigation Links
             <>
+              <Link
+                href="/supervisor"
+                className="text-indigo-500 hover:text-blue-500 px-3 py-2">
+                Dashboard
+              </Link>
               <Link
                 href="/supervisor/votes"
                 className="text-gray-900 hover:text-blue-500 px-3 py-2">
                 Vote Sessions
               </Link>
               <Link
-                href="/supervisor/supervisors"
+                href="/supervisor/account"
                 className="text-gray-900 hover:text-blue-500 px-3 py-2">
                 Supervisor
               </Link>
@@ -78,6 +77,11 @@ export default function NavBar() {
           ) : (
             // Regular User Navigation Links
             <>
+              <Link
+                href="/"
+                className="text-indigo-500 hover:text-blue-500 px-3 py-2">
+                Home
+              </Link>
               <Link
                 href="/votes"
                 className="text-gray-900 hover:text-blue-500 px-3 py-2">

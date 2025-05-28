@@ -75,7 +75,7 @@ export class AuthService {
         data
       );
 
-      this.saveToken(response.data.accessToken, "SUPERVISOR");
+      this.saveTokenData(response.data.accessToken, "SUPERVISOR");
       this.decodeAndLogToken(response.data.accessToken);
       return response.data;
     } catch (error: unknown) {
@@ -103,7 +103,7 @@ export class AuthService {
         data
       );
 
-      this.saveToken(response.data.accessToken, "SIGNER");
+      this.saveTokenData(response.data.accessToken, "SIGNER");
       this.decodeAndLogToken(response.data.accessToken);
       return response.data;
     } catch (error: unknown) {
@@ -144,6 +144,7 @@ export class AuthService {
           localStorage.setItem("accessToken", token);
           localStorage.setItem("userRole", role);
           localStorage.setItem("userId", payload.id || "");
+          console.log("Token parts:", tokenParts);
 
           // Set cookies for middleware access
           document.cookie = `accessToken=${token}; path=/; max-age=86400`;

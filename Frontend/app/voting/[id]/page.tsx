@@ -89,7 +89,11 @@ export default function VoteCastPage() {
     } catch (error: unknown) {
       if (error instanceof AxiosError) {
         if (error.response) {
-          if (error.response.status === 400 || error.response.status === 404) {
+          if (
+            error.response.status === 400 ||
+            error.response.status === 404 ||
+            error.response.status === 409
+          ) {
             toast.error("Invalid key or you have already voted");
           } else {
             toast.error("Failed to cast vote");

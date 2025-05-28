@@ -3,6 +3,7 @@ import { AuthService } from "./auth.service";
 import { StatsDto } from "../dto/stats.dto";
 import { AccountDistributionDto } from "@/dto/account-distribution.dto";
 import { VoteSessionDistributionDto } from "../dto/vote-session-distribution.dto";
+import { SupervisorCreateDto, SupervisorDto } from "@/dto/supervisor.dto";
 
 // Define the shape of the MonthlySessionDto
 interface MonthlySessionDto {
@@ -85,6 +86,64 @@ export class SupervisorService {
       return response.data;
     } catch (error: unknown) {
       console.error("Error fetching session distribution:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get all supervisors
+   * @returns Promise with an array of supervisors
+   */
+  static async getAllSupervisors(): Promise<SupervisorDto[]> {
+    try {
+      const response = await axios.get<SupervisorDto[]>(
+        `${this.BACKEND_URL}/supervisor`,
+        {
+          headers: this.getAuthHeader(),
+        }
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error("Error fetching supervisors:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Delete a supervisor by ID
+   * @param id The ID of the supervisor to delete
+   * @returns Promise with the deletion result
+   */
+  static async deleteSupervisor(id: string): Promise<void> {
+    try {
+      await axios.delete(`${this.BACKEND_URL}/supervisor/${id}`, {
+        headers: this.getAuthHeader(),
+      });
+    } catch (error: unknown) {
+      console.error(`Error deleting supervisor with ID ${id}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Create a new supervisor
+   * @param supervisorData The data for creating a new supervisor
+   * @returns Promise with the created supervisor
+   */
+  static async createSupervisor(
+    supervisorData: SupervisorCreateDto
+  ): Promise<SupervisorDto> {
+    try {
+      const response = await axios.post<SupervisorDto>(
+        `${this.BACKEND_URL}/auth/supervisor/register`,
+        supervisorData,
+        {
+          headers: this.getAuthHeader(),
+        }
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error("Error creating supervisor:", error);
       throw error;
     }
   }

@@ -1,6 +1,7 @@
 import axios from "axios";
 import { SignerCreateDto, SignerDto } from "@/dto/signer.dto";
 import { AuthService } from "./auth.service";
+import { VoteSessionDto } from "@/dto/vote-session.dto";
 
 export class SignerService {
   private static BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -90,5 +91,66 @@ export class SignerService {
     return {
       Authorization: `Bearer ${token}`,
     };
+  }
+
+  /**
+   * Get vote sessions for a specific signer
+   * @param signerId The ID of the signer
+   * @returns Promise with an array of vote sessions assigned to the signer
+   */
+  static async getVoteSessionsBySigner(): Promise<VoteSessionDto[]> {
+    try {
+      const response = await axios.get<VoteSessionDto[]>(
+        `${this.BACKEND_URL}/session/signer/`,
+        {
+          headers: this.getAuthHeader(),
+        }
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error(
+        `Error fetching vote sessions for signer ${signerId}:`,
+        error
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Get signer profile
+   * @returns Promise with the signer profile
+   * */
+  static async getSignerProfile(): Promise<SignerDto> {
+    try {
+      const response = await axios.get<SignerDto>(
+        `${this.BACKEND_URL}/signer/profile`,
+        {
+          headers: this.getAuthHeader(),
+        }
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error("Error fetching signer profile:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Count total user
+   * @return Promise with total users
+   * */
+  static async countTotalUsers(): Promise<number> {
+    try {
+      const response = await axios.get<number>(
+        `${this.BACKEND_URL}/user/count`,
+        {
+          headers: this.getAuthHeader(),
+        }
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error("Error counting users:", error);
+      throw error;
+    }
   }
 }

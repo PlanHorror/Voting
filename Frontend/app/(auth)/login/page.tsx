@@ -42,6 +42,7 @@ export default function LoginPage() {
             password,
           });
           toast.success("User login successful");
+          router.push("/"); // Regular users go to home
           break;
         case "supervisor":
           response = await AuthService.supervisorLogin({
@@ -49,6 +50,7 @@ export default function LoginPage() {
             password,
           });
           toast.success("Supervisor login successful");
+          router.push("/supervisor"); // Supervisors go to supervisor dashboard
           break;
         case "signer":
           response = await AuthService.signerLogin({
@@ -56,25 +58,12 @@ export default function LoginPage() {
             password,
           });
           toast.success("Signer login successful");
+          router.push("/signer"); // Signers go to signer dashboard
           break;
       }
 
       console.log("Login successful:", response);
-
-      // Redirect based on user type
-      // switch (loginType) {
-      //   case "user":
-      //     router.push("/dashboard/user");
-      //     break;
-      //   case "supervisor":
-      //     router.push("/dashboard/supervisor");
-      //     break;
-      //   case "signer":
-      //     router.push("/dashboard/signer");
-      //     break;
-      // }
-      router.push("/");
-    } catch (error: unkown) {
+    } catch (error) {
       console.debug("Login error:", error);
       toast.error("Wrong username or password");
     } finally {
