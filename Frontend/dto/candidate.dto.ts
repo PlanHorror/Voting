@@ -5,3 +5,8 @@ export interface CandidateDto {
   description: string;
   totalVotes: number;
 }
+
+export interface CandidateCreateDto {
+  name: string;
+  description: string;
+}

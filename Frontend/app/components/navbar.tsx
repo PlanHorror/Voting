@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AuthService } from "@/services/auth.service";
 import { Toaster, toast } from "sonner";
+import { Role } from "@/shared/enum/role.enum";
 
 export default function NavBar() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -54,21 +55,46 @@ export default function NavBar() {
             className="text-indigo-500 hover:text-blue-500 px-3 py-2">
             Home
           </Link>
-          <Link
-            href="/votes"
-            className="text-gray-900 hover:text-blue-500 px-3 py-2">
-            List votes
-          </Link>
-          <Link
-            href="/voting"
-            className="text-gray-900 hover:text-blue-500 px-3 py-2">
-            Voting
-          </Link>
-          <Link
-            href="/result"
-            className="text-gray-900 hover:text-blue-500 px-3 py-2">
-            Result
-          </Link>
+
+          {userRole === Role.SUPERVISOR.toString() ? (
+            // Supervisor Navigation Links
+            <>
+              <Link
+                href="/supervisor/votes"
+                className="text-gray-900 hover:text-blue-500 px-3 py-2">
+                Vote Sessions
+              </Link>
+              <Link
+                href="/supervisor/supervisors"
+                className="text-gray-900 hover:text-blue-500 px-3 py-2">
+                Supervisor
+              </Link>
+              <Link
+                href="/supervisor/signers"
+                className="text-gray-900 hover:text-blue-500 px-3 py-2">
+                Signers
+              </Link>
+            </>
+          ) : (
+            // Regular User Navigation Links
+            <>
+              <Link
+                href="/votes"
+                className="text-gray-900 hover:text-blue-500 px-3 py-2">
+                List votes
+              </Link>
+              <Link
+                href="/voting"
+                className="text-gray-900 hover:text-blue-500 px-3 py-2">
+                Voting
+              </Link>
+              <Link
+                href="/result"
+                className="text-gray-900 hover:text-blue-500 px-3 py-2">
+                Result
+              </Link>
+            </>
+          )}
         </div>
 
         <div className="flex justify-end items-center space-x-4">

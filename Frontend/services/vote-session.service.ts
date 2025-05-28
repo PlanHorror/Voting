@@ -1,12 +1,12 @@
 import axios from "axios";
-import { VoteSessionDto } from "../dto/vote-session.dto";
 import {
-  VoteParticipantDto,
-  VoteParticipantKeyDto,
-} from "../dto/vote-participants.dto";
-import { CandidateDto } from "../dto/candidate.dto";
+  VoteSessionCandidateDto,
+  VoteSessionCreateDto,
+  VoteSessionDto,
+} from "../dto/vote-session.dto";
+import { VoteParticipantKeyDto } from "../dto/vote-participants.dto";
+import { CandidateCreateDto, CandidateDto } from "../dto/candidate.dto";
 import { AuthService } from "./auth.service";
-import { VoteDto } from "@/dto/vote.dto";
 
 export class VoteSessionService {
   private static BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -23,6 +23,27 @@ export class VoteSessionService {
       return response.data;
     } catch (error: unknown) {
       console.error("Error fetching vote sessions:", error);
+      throw error;
+    }
+  }
+  // Get vote session by supervisor
+  static async getVoteSessionsBySupervisorId(
+    supervisorId: string
+  ): Promise<VoteSessionDto[]> {
+    try {
+      const response = await axios.get<VoteSessionDto[]>(
+        `${this.BACKEND_URL}/session`,
+        {
+          headers: this.getAuthHeader(),
+        }
+      );
+      console.log(response.data[0].signer);
+      return response.data;
+    } catch (error: unknown) {
+      console.error(
+        `Error fetching vote sessions for supervisor ${supervisorId}:`,
+        error
+      );
       throw error;
     }
   }
@@ -43,7 +64,7 @@ export class VoteSessionService {
   }
 
   static async createVoteSession(
-    data: Partial<VoteSessionDto>
+    data: VoteSessionCreateDto
   ): Promise<VoteSessionDto> {
     try {
       const response = await axios.post<VoteSessionDto>(
@@ -56,6 +77,29 @@ export class VoteSessionService {
       return response.data;
     } catch (error: unknown) {
       console.error("Error creating vote session:", error);
+      throw error;
+    }
+  }
+
+  static async createVoteSessionWithCandidates(
+    sessionData: VoteSessionCreateDto,
+    candidatesData: CandidateCreateDto[]
+  ): Promise<VoteSessionDto> {
+    try {
+      // First create the vote session
+      const session = await this.createVoteSession(sessionData);
+
+      // Then create the candidates using the session ID
+      if (candidatesData.length > 0) {
+        await this.createManyCandidates(session.id, candidatesData);
+
+        // Fetch the updated session with candidates included
+        return await this.getVoteSessionById(session.id);
+      }
+
+      return session;
+    } catch (error: unknown) {
+      console.error("Error creating vote session with candidates:", error);
       throw error;
     }
   }
@@ -91,25 +135,25 @@ export class VoteSessionService {
   }
 
   // Candidate operations
-  static async getCandidatesByVoteSessionId(
-    voteSessionId: string
-  ): Promise<CandidateDto[]> {
-    try {
-      const response = await axios.get<CandidateDto[]>(
-        `${this.BACKEND_URL}/session/candidates/vote-session/${voteSessionId}`,
-        {
-          headers: this.getAuthHeader(),
-        }
-      );
-      return response.data;
-    } catch (error: unknown) {
-      console.error(
-        `Error fetching candidates for vote session ${voteSessionId}:`,
-        error
-      );
-      throw error;
-    }
-  }
+  // static async getCandidatesByVoteSessionId(
+  //   voteSessionId: string
+  // ): Promise<CandidateDto[]> {
+  //   try {
+  //     const response = await axios.get<CandidateDto[]>(
+  //       `${this.BACKEND_URL}/session/candidates/vote-session/${voteSessionId}`,
+  //       {
+  //         headers: this.getAuthHeader(),
+  //       }
+  //     );
+  //     return response.data;
+  //   } catch (error: unknown) {
+  //     console.error(
+  //       `Error fetching candidates for vote session ${voteSessionId}:`,
+  //       error
+  //     );
+  //     throw error;
+  //   }
+  // }
 
   static async createCandidate(
     data: Partial<CandidateDto>
@@ -131,15 +175,17 @@ export class VoteSessionService {
 
   static async createManyCandidates(
     voteSessionId: string,
-    candidates: Partial<CandidateDto>[]
+    candidates: CandidateCreateDto[]
   ): Promise<CandidateDto[]> {
     try {
+      const voteSessionCandidateDto: VoteSessionCandidateDto = {
+        voteSessionId,
+        candidates,
+      };
+
       const response = await axios.post<CandidateDto[]>(
         `${this.BACKEND_URL}/session/candidates/many`,
-        {
-          voteSessionId,
-          candidates,
-        },
+        voteSessionCandidateDto,
         {
           headers: this.getAuthHeader(),
         }
@@ -181,35 +227,54 @@ export class VoteSessionService {
     }
   }
 
-  // Vote operations
-  static async getAllVotes(): Promise<VoteDto[]> {
-    try {
-      const response = await axios.get<VoteDto[]>(
-        `${this.BACKEND_URL}/votes/all`
-      );
-      return response.data;
-    } catch (error: unknown) {
-      console.error("Error fetching all votes:", error);
-      throw error;
-    }
-  }
-
-  static async getVotesByVoteSessionId(
+  static async deleteAllCandidatesForVoteSession(
     voteSessionId: string
-  ): Promise<VoteDto[]> {
+  ): Promise<void> {
     try {
-      const response = await axios.get<VoteDto[]>(
-        `${this.BACKEND_URL}/votes/session/${voteSessionId}`
+      await axios.delete(
+        `${this.BACKEND_URL}/session/candidates/vote-session/${voteSessionId}`,
+        {
+          headers: this.getAuthHeader(),
+        }
       );
-      return response.data;
     } catch (error: unknown) {
       console.error(
-        `Error fetching votes for vote session ${voteSessionId}:`,
+        `Error deleting all candidates for vote session ${voteSessionId}:`,
         error
       );
       throw error;
     }
   }
+
+  // Vote operations
+  // static async getAllVotes(): Promise<VoteDto[]> {
+  //   try {
+  //     const response = await axios.get<VoteDto[]>(
+  //       `${this.BACKEND_URL}/votes/all`
+  //     );
+  //     return response.data;
+  //   } catch (error: unknown) {
+  //     console.error("Error fetching all votes:", error);
+  //     throw error;
+  //   }
+  // }
+
+  // static async getVotesByVoteSessionId(
+  //   voteSessionId: string
+  // ): Promise<VoteDto[]> {
+  //   try {
+  //     const response = await axios.get<VoteDto[]>(
+  //       `${this.BACKEND_URL}/votes/session/${voteSessionId}`
+  //     );
+  //     return response.data;
+  //   } catch (error: unknown) {
+  //     console.error(
+  //       `Error fetching votes for vote session ${voteSessionId}:`,
+  //       error
+  //     );
+  //     throw error;
+  //   }
+  // }
 
   static async castVote(
     voteSessionId: string,

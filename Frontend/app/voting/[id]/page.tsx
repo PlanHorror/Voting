@@ -6,6 +6,7 @@ import { VoteSessionService } from "@/services/vote-session.service";
 import { VoteSessionDto } from "@/dto/vote-session.dto";
 import { CandidateDto } from "@/dto/candidate.dto";
 import { toast } from "sonner";
+import { AxiosError } from "axios";
 
 export default function VoteCastPage() {
   const params = useParams();
@@ -86,14 +87,16 @@ export default function VoteCastPage() {
         router.push("/result");
       }, 2000);
     } catch (error: unknown) {
-      if (error.response) {
-        if (error.response.status === 400 || error.response.status === 404) {
-          toast.error("Invalid key or you have already voted");
+      if (error instanceof AxiosError) {
+        if (error.response) {
+          if (error.response.status === 400 || error.response.status === 404) {
+            toast.error("Invalid key or you have already voted");
+          } else {
+            toast.error("Failed to cast vote");
+          }
         } else {
-          toast.error("Failed to cast vote");
+          toast.error("Failed to connect to voting service");
         }
-      } else {
-        toast.error("Failed to connect to voting service");
       }
     } finally {
       setSubmitting(false);
