@@ -1,5 +1,5 @@
 import axios from "axios";
-import { SignerDto } from "@/dto/signer.dto";
+import { SignerCreateDto, SignerDto } from "@/dto/signer.dto";
 import { AuthService } from "./auth.service";
 
 export class SignerService {
@@ -37,6 +37,46 @@ export class SignerService {
       return response.data;
     } catch (error: unknown) {
       console.error("Error deleting signer:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get a signer by ID
+   * @param id The ID of the signer to retrieve
+   * @returns Promise with the signer details
+   */
+  static async getSignerById(id: string): Promise<SignerDto> {
+    try {
+      const response = await axios.get<SignerDto>(
+        `${this.BACKEND_URL}/signer/${id}`,
+        {
+          headers: this.getAuthHeader(),
+        }
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error(`Error fetching signer with ID ${id}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Create a new signer
+   * @param signerData The data for creating a new signer
+   * @returns Promise with the created signer
+   */
+  static async createSigner(signerData: SignerCreateDto): Promise<SignerDto> {
+    try {
+      const response = await axios.post<SignerDto>(
+        `${this.BACKEND_URL}/auth/signer/register`,
+        signerData,
+        {
+          headers: this.getAuthHeader(),
+        }
+      );
+      return response.data;
+    } catch (error: unknown) {
       throw error;
     }
   }
