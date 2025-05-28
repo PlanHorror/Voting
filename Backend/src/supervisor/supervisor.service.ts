@@ -153,4 +153,128 @@ export class SupervisorService {
     await this.findSupervisorById(id);
     return await this.deleteSupervisor(id);
   }
+
+  async dashboardStats(): Promise<any> {
+    const totalVoteSessions = await this.prismaService.voteSession.count();
+    const activeVoteSessions = await this.prismaService.voteSession.count({
+      where: {
+        endDate: {
+          gte: new Date(),
+        },
+      },
+    });
+    const supervisors = await this.prismaService.supervisor.count();
+    const totalSigners = await this.prismaService.signer.count();
+    return {
+      totalVoteSessions,
+      activeVoteSessions,
+      supervisors,
+      totalSigners,
+    };
+  }
+
+  async countTotalVoteSessionsByMonth(): Promise<any> {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    const currentYear = new Date().getFullYear();
+    const voteSessions = await this.prismaService.voteSession.findMany({
+      where: {
+        endDate: {
+          gte: new Date(`${currentYear}-01-01`),
+          lt: new Date(`${currentYear + 1}-01-01`),
+        },
+      },
+      select: {
+        endDate: true,
+      },
+    });
+    const monthlyCounts = Array(12).fill(0);
+    voteSessions.forEach((session) => {
+      const monthIndex = session.endDate.getMonth();
+      monthlyCounts[monthIndex]++;
+    });
+    const result = months.map((month, index) => ({
+      month,
+      count: monthlyCounts[index],
+    }));
+    return result;
+  }
+
+  async userDistribution(): Promise<any> {
+    const supervisors = await this.prismaService.supervisor.count();
+    const signers = await this.prismaService.signer.count();
+    const normalUsers = await this.prismaService.user.count();
+    return {
+      supervisors,
+      signers,
+      normalUsers,
+    };
+  }
+
+  async participationRate(): Promise<any> {
+    // Select all vote sessions including their total participation count by counting the participation records
+    const voteSessions = await this.prismaService.voteSession.findMany({
+      include: {
+        _count: {
+          select: { voteParticipants: true },
+        },
+      },
+    });
+    return voteSessions;
+  }
+
+  async voteSessionDistribution(): Promise<any> {
+    const voteSessions = await this.prismaService.voteSession.findMany({
+      select: {
+        candidates: true,
+      },
+    });
+    const endVoteSessions = await this.prismaService.voteSession.findMany({
+      where: {
+        endDate: {
+          lte: new Date(),
+        },
+      },
+      select: {
+        candidates: true,
+      },
+    });
+
+    const count = {
+      winner: 0,
+      tie: 0,
+      noVotes: 0,
+      inProgress: voteSessions.length - endVoteSessions.length,
+    };
+    endVoteSessions.forEach((session) => {
+      if (session.candidates.length === 0) {
+        count.noVotes++;
+      } else {
+        const maxVotes = Math.max(
+          ...session.candidates.map((c) => c.totalVotes),
+        );
+        const winners = session.candidates.filter(
+          (c) => c.totalVotes === maxVotes,
+        );
+        if (winners.length > 1) {
+          count.tie++;
+        } else {
+          count.winner++;
+        }
+      }
+    });
+    return count;
+  }
 }

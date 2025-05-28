@@ -54,6 +54,7 @@ export class JwtAccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
       }
       throw new BadRequestException('Invalid token');
     } catch (error) {
+      console.error('Error in JWT validation:', error);
       throw new BadRequestException('Invalid token');
     }
   }

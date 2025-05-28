@@ -22,4 +22,28 @@ export class SupervisorController {
   ): Promise<Supervisor> {
     return await this.supervisorService.findSupervisorById(userData.user.id);
   }
+
+  @Get('stats')
+  @UseGuards(AuthGuard('jwt'), new RoleGuard([Role.SUPERVISOR]))
+  async getStats(): Promise<any> {
+    return await this.supervisorService.dashboardStats();
+  }
+
+  @Get('sessions/monthly')
+  @UseGuards(AuthGuard('jwt'), new RoleGuard([Role.SUPERVISOR]))
+  async getMonthlySessions(): Promise<any> {
+    return await this.supervisorService.countTotalVoteSessionsByMonth();
+  }
+
+  @Get('account-distribution')
+  @UseGuards(AuthGuard('jwt'), new RoleGuard([Role.SUPERVISOR]))
+  async getAccountDistribution(): Promise<any> {
+    return await this.supervisorService.userDistribution();
+  }
+
+  @Get('sessions-distribution')
+  @UseGuards(AuthGuard('jwt'), new RoleGuard([Role.SUPERVISOR]))
+  async getSessionsDistribution(): Promise<any> {
+    return await this.supervisorService.voteSessionDistribution();
+  }
 }
