@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  userdb:
+    image: postgres
+    container_name: userdb
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: userdb
+    ports:
+      - "5433:5432"
+    volumes:
+      - userdb_data:/var/lib/postgresql/data
+
+  sessiondb:
+    image: postgres
+    container_name: sessiondb
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: sessiondb
+    ports:
+      - "5434:5432"
+    volumes:
+      - sessiondb_data:/var/lib/postgresql/data
+
+  votedb:
+    image: postgres
+    container_name: votedb
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: votedb
+    ports:
+      - "5435:5432"
+    volumes:
+      - votedb_data:/var/lib/postgresql/data
+
+volumes:
+  userdb_data:
+  sessiondb_data:
+  votedb_data:
