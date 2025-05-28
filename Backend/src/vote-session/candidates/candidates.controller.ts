@@ -14,7 +14,7 @@ import { RoleGuard } from 'src/common/guard/role.guard';
 import { GetUser } from 'src/common/decorator/getuser.decorator';
 import { Supervisor } from '@prisma/client';
 import { Role } from 'src/common/enum';
-import { CandidateDto } from 'src/common/dto/candidate.dto';
+import { CandidateDto, ListCandidateDto } from 'src/common/dto/candidate.dto';
 
 @Controller('session/candidates')
 export class CandidatesController {
@@ -66,6 +66,19 @@ export class CandidatesController {
     @Body() data: CandidateDto,
   ) {
     return await this.candidateService.createCandidateService(
+      data,
+      userData.user.id,
+    );
+  }
+
+  // Create multiple candidates for a vote session
+  @Post('many')
+  @UseGuards(AuthGuard('jwt'), new RoleGuard([Role.SUPERVISOR]))
+  async createManyCandidates(
+    @GetUser() userData: { user: Supervisor; role: Role },
+    @Body() data: ListCandidateDto,
+  ) {
+    return await this.candidateService.createManyCandidatesService(
       data,
       userData.user.id,
     );

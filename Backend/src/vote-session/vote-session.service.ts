@@ -30,6 +30,7 @@ export class VoteSessionService {
         candidates: true,
         votes: true,
         voteParticipants: true,
+        signer: true,
       },
     });
   }
@@ -66,6 +67,7 @@ export class VoteSessionService {
           candidates: true,
           votes: true,
           voteParticipants: true,
+          signer: true,
         },
       });
     } catch (error) {
@@ -113,6 +115,7 @@ export class VoteSessionService {
         where: { id },
       });
     } catch (error) {
+      console.error(error);
       throw new BadRequestException('Error deleting vote session');
     }
   }

@@ -1,4 +1,7 @@
+import { Type } from 'class-transformer';
 import {
+  ArrayMinSize,
+  IsArray,
   IsNotEmpty,
   IsString,
   IsUUID,
@@ -36,6 +39,8 @@ export class ListCandidateDto {
   voteSessionId: string;
 
   @ValidateNested({ each: true })
-  @MinLength(1)
+  @ArrayMinSize(1)
+  @IsArray()
+  @Type(() => CandidateDataDto)
   candidates: CandidateDataDto[];
 }

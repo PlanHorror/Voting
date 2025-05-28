@@ -44,9 +44,9 @@ model Signer {
 model VoteSession {
   id        String   @id @default(uuid())
   supervisorId String
-  supervisor Supervisor @relation(fields: [supervisorId], references: [id])
+  supervisor Supervisor @relation(fields: [supervisorId], references: [id], onDelete: Cascade)
   signerId String
-  signer Signer @relation(fields: [signerId], references: [id])
+  signer Signer @relation(fields: [signerId], references: [id], onDelete: Cascade)
   title     String
   description String
   endDate   DateTime
@@ -62,9 +62,9 @@ model VoteSession {
 model VoteParticipant {
   id        String   @id @default(uuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   voteSessionId String
-  voteSession VoteSession @relation(fields: [voteSessionId], references: [id])
+  voteSession VoteSession @relation(fields: [voteSessionId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@unique([userId, voteSessionId], name: "unique_vote_participant")
@@ -89,7 +89,7 @@ model Candidate {
   id        String   @id @default(uuid())
   hashId   String?   @unique 
   voteSessionId String
-  voteSession VoteSession @relation(fields: [voteSessionId], references: [id])
+  voteSession VoteSession @relation(fields: [voteSessionId], references: [id], onDelete: Cascade)
   name      String
   description String
   totalVotes Int @default(0)

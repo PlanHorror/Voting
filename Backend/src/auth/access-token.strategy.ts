@@ -4,29 +4,29 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { Prisma, User, Signer, Supervisor } from '@prisma/client';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Role } from 'src/common/enum';
 import { Payload } from 'src/common/interface';
 import { PrismaService } from 'src/prisma.service';
-
+import { User, Supervisor, Signer } from '@prisma/client';
 @Injectable()
 export class JwtAccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor() {
+  constructor(private prismaService: PrismaService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey: process.env.JWT_SECRET || 'defaultSecret',
     });
   }
+
   async validate(
     payload: Payload,
   ): Promise<{ user: User | Supervisor | Signer; role: Role }> {
     const { id, role } = payload;
-    const prisma = new PrismaService();
+
     try {
       if (role === Role.USER) {
-        const user = await prisma.user.findUnique({
+        const user = await this.prismaService.user.findUnique({
           where: { id },
         });
         if (!user) {
@@ -35,7 +35,7 @@ export class JwtAccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
         return { user, role };
       }
       if (role === Role.SUPERVISOR) {
-        const supervisor = await prisma.supervisor.findUnique({
+        const supervisor = await this.prismaService.supervisor.findUnique({
           where: { id },
         });
         if (!supervisor) {
@@ -44,7 +44,7 @@ export class JwtAccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
         return { user: supervisor, role };
       }
       if (role === Role.SIGNER) {
-        const signer = await prisma.signer.findUnique({
+        const signer = await this.prismaService.signer.findUnique({
           where: { id },
         });
         if (!signer) {

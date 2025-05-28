@@ -73,7 +73,7 @@ export class SignerService {
     }
   }
 
-  async updateSigner(data: SignerUpdateDto, user: User): Promise<Signer> {
+  async updateSigner(data: SignerUpdateDto, user: Signer): Promise<Signer> {
     try {
       const { username, old_password, new_password, confirm_password } = data;
       if (old_password && new_password && confirm_password) {
@@ -133,7 +133,7 @@ export class SignerService {
 
   async updateSignerService(
     data: SignerUpdateDto,
-    user: User,
+    user: Signer,
   ): Promise<Signer> {
     if (!data) {
       throw new BadRequestException('Not enough data provided');

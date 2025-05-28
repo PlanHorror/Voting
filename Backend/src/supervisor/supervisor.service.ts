@@ -165,11 +165,17 @@ export class SupervisorService {
     });
     const supervisors = await this.prismaService.supervisor.count();
     const totalSigners = await this.prismaService.signer.count();
+    const totalParticipants = await this.prismaService.voteParticipant.count();
+    const avgParticipantsPerSession = totalParticipants
+      ? totalParticipants / totalVoteSessions
+      : 0;
     return {
       totalVoteSessions,
       activeVoteSessions,
       supervisors,
       totalSigners,
+      totalParticipants,
+      avgParticipantsPerSession,
     };
   }
 
