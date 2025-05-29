@@ -1,4 +1,9 @@
-import { IsNotEmpty, IsPhoneNumber, IsString } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsOptional,
+  IsPhoneNumber,
+  IsString,
+} from 'class-validator';
 export class UserSignUpDto {
   @IsNotEmpty()
   @IsString()
@@ -28,18 +33,21 @@ export class UserUpdateDto {
   citizenId: string;
 
   @IsNotEmpty()
-  @IsPhoneNumber('VN')
+  @IsString()
   phone: string;
 
   @IsNotEmpty()
   @IsString()
+  @IsOptional()
   old_password: string;
 
   @IsNotEmpty()
   @IsString()
+  @IsOptional()
   new_password: string;
 
   @IsNotEmpty()
   @IsString()
+  @IsOptional()
   confirm_password: string;
 }

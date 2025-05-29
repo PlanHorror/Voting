@@ -207,13 +207,13 @@ export class VotesService {
     const vote = await this.getVoteByKey(data.key);
     const now = new Date();
     if (voteSession.id !== vote.voteSessionId) {
-      throw new ConflictException('Vote session not found');
+      throw new NotFoundException('Vote invalid or already used');
     }
     if (vote.isVoted || candidate.voteSessionId !== voteSession.id) {
-      throw new ConflictException('Vote invalid or already used');
+      throw new NotFoundException('Vote invalid or already used');
     }
     if (voteSession.endDate < now) {
-      throw new ConflictException('Vote session is not active');
+      throw new NotFoundException('Vote session is not active');
     }
     const { blindMessage, blindingFactor, hashMessage } = blindedMessage(
       data.candidateIdHash,

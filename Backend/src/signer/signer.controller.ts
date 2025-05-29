@@ -24,6 +24,12 @@ export class SignerController {
     return this.signerService.findAllSigners();
   }
 
+  @Get('find/:id')
+  @UseGuards(AuthGuard('jwt'), new RoleGuard([Role.SUPERVISOR]))
+  async getSignerById(@Param('id') id: string): Promise<Signer> {
+    return this.signerService.findSignerById(id);
+  }
+
   @Get('profile')
   @UseGuards(AuthGuard('jwt'), new RoleGuard([Role.SIGNER]))
   async getProfile(
@@ -38,7 +44,7 @@ export class SignerController {
     @GetUser() userData: { user: Signer; role: Role },
     @Body() updateData: SignerUpdateDto,
   ): Promise<Signer> {
-    return this.signerService.updateSigner(updateData, userData.user);
+    return this.signerService.updateSignerService(updateData, userData.user);
   }
 
   @Delete('/:id')

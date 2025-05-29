@@ -34,7 +34,9 @@ model Supervisor {
 
 model Signer {
   id        String   @id @default(uuid())
-  username String   @unique
+  username String   @unique 
+  email    String   @unique 
+  phone    String   @unique 
   password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

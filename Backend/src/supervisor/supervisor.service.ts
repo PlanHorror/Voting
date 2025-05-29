@@ -1,7 +1,9 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Supervisor } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
@@ -72,7 +74,7 @@ export class SupervisorService {
       return supervisor;
     } catch (error) {
       if (error.code === 'P2002') {
-        throw new BadRequestException('Username already exists');
+        throw new ConflictException('Username already exists');
       }
       throw new BadRequestException('Error creating supervisor');
     }
@@ -83,10 +85,10 @@ export class SupervisorService {
       if (old_password && new_password && confirm_password) {
         const isMatch = await bcrypt.compare(old_password, user.password);
         if (!isMatch) {
-          throw new BadRequestException('Old password is incorrect');
+          throw new UnauthorizedException('Old password is incorrect');
         }
         if (new_password !== confirm_password) {
-          throw new BadRequestException('New password does not match');
+          throw new UnauthorizedException('New password does not match');
         }
         const salt = await bcrypt.genSalt();
         const hashPassword = await bcrypt.hash(new_password, salt);
@@ -107,7 +109,7 @@ export class SupervisorService {
       }
     } catch (error) {
       if (error.code === 'P2002') {
-        throw new BadRequestException('Username already exists');
+        throw new ConflictException('Username already exists');
       }
       throw new BadRequestException('Error creating supervisor');
     }
@@ -117,7 +119,6 @@ export class SupervisorService {
       const supervisor = await this.prismaService.supervisor.delete({
         where: { id },
       });
-      return supervisor;
     } catch (error) {
       throw new NotFoundException('Account not found');
     }
@@ -146,7 +147,7 @@ export class SupervisorService {
     return await this.updateSupervisor(data, user);
   }
 
-  async deleteSupervisorService(id: string): Promise<Supervisor> {
+  async deleteSupervisorService(id: string): Promise<void> {
     if (!id) {
       throw new BadRequestException('Not enough data provided');
     }

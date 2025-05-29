@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { UserSignUpDto, UserUpdateDto } from 'src/common/dto';
 import { PrismaService } from 'src/prisma.service';
@@ -84,6 +85,15 @@ export class UserService {
     }
   }
 
+  async countUsers() {
+    try {
+      const count = await this.prismaService.user.count();
+      return count;
+    } catch (error) {
+      throw new BadRequestException('Error counting users');
+    }
+  }
+
   async createUser(data: UserSignUpDto) {
     try {
       const { citizenId, phone, password } = data;
@@ -115,7 +125,7 @@ export class UserService {
           user.password,
         );
         if (new_password !== confirm_password || !verifyPassword) {
-          throw new BadRequestException('Invalid password');
+          throw new UnauthorizedException('Invalid password');
         }
         const salt = await bcrypt.genSalt();
         const hashPassword = await bcrypt.hash(new_password, salt);
@@ -140,6 +150,7 @@ export class UserService {
       if (error.code === 'P2002') {
         throw new ConflictException('User already exists');
       }
+      console.error(error);
       throw new BadRequestException('Error updating user');
     }
   }

@@ -75,6 +75,27 @@ export class VoteSessionService {
     }
   }
 
+  async getVoteSessionBySignerId(signer: Supervisor): Promise<VoteSession[]> {
+    if (!signer) {
+      throw new BadRequestException('Not enough data provided');
+    }
+    try {
+      return this.prismaService.voteSession.findMany({
+        where: {
+          signerId: signer.id,
+        },
+        include: {
+          candidates: true,
+          votes: true,
+          voteParticipants: true,
+          signer: true,
+        },
+      });
+    } catch (error) {
+      throw new NotFoundException('Vote session not found');
+    }
+  }
+
   async createVoteSession(data: VoteSessionDto): Promise<VoteSession> {
     const { publicKey, privateKey } = generatePublicandPrivateKey();
     try {

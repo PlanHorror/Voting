@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsOptional, IsString, ValidateIf } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  ValidateIf,
+} from 'class-validator';
 
 export class SignerSignUpDto {
   @IsNotEmpty()
@@ -8,6 +14,14 @@ export class SignerSignUpDto {
   @IsNotEmpty()
   @IsString()
   password: string;
+
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
+
+  @IsNotEmpty()
+  @IsString()
+  phone: string;
 }
 
 export class SignerSignInDto {
@@ -25,6 +39,16 @@ export class SignerUpdateDto {
   @IsString()
   username: string;
 
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
+
+  @IsNotEmpty()
+  @IsString()
+  phone: string;
+
+  @IsNotEmpty()
+  @IsString()
   @IsNotEmpty()
   @IsOptional()
   old_password: string;

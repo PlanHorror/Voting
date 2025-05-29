@@ -13,7 +13,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { RoleGuard } from 'src/common/guard/role.guard';
 import { Role } from 'src/common/enum';
 import { GetUser } from 'src/common/decorator/getuser.decorator';
-import { Supervisor } from '@prisma/client';
+import { Signer, Supervisor } from '@prisma/client';
 import { VoteSessionCreateDto } from 'src/common/dto/vote-session.dto';
 
 @Controller('session')
@@ -29,6 +29,14 @@ export class VoteSessionController {
   @UseGuards(AuthGuard('jwt'), new RoleGuard([Role.SUPERVISOR]))
   async getVoteSession(@GetUser() userData: { user: Supervisor; role: Role }) {
     return this.voteSessionService.getVoteSessionBySupervisorId(userData.user);
+  }
+
+  @Get('signer')
+  @UseGuards(AuthGuard('jwt'), new RoleGuard([Role.SIGNER]))
+  async getVoteSessionBySigner(
+    @GetUser() userData: { user: Signer; role: Role },
+  ) {
+    return this.voteSessionService.getVoteSessionBySignerId(userData.user);
   }
 
   // @Get('find/:id')
