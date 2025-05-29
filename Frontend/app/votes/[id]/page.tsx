@@ -8,6 +8,7 @@ import { AuthService } from "@/services/auth.service";
 import { VoteSessionDto } from "@/dto/vote-session.dto";
 import { CandidateDto } from "@/dto/candidate.dto";
 import { toast } from "sonner";
+import { AxiosError } from "axios";
 
 const DEFAULT_IMAGE = "/banner.jpg";
 
@@ -130,12 +131,14 @@ export default function VoteDetailPage() {
       // Show key to user in a modal
       setVoteKey(response.key);
       setShowKeyModal(true);
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Check for specific error status
-      if (error.response && error.response.status === 400) {
-        toast.error("You have already taken a key for this vote session");
-      } else {
-        toast.error("Something went wrong when attempting to get a key");
+      if (error instanceof AxiosError) {
+        if (error.response && error.response.status === 400) {
+          toast.error("You have already taken a key for this vote session");
+        } else {
+          toast.error("Something went wrong when attempting to get a key");
+        }
       }
     } finally {
       setKeyLoading(false);

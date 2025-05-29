@@ -105,8 +105,8 @@ export default function SignerDetailPage() {
             Signer not found
           </h2>
           <p className="text-gray-500 mt-2">
-            The signer you're looking for doesn't exist or you don't have
-            permission to view it.
+            The signer you&apos;re looking for doesn&apos;t exist or you
+            don&apos;t have permission to view it.
           </p>
           <Link
             href="/supervisor/signers"
@@ -300,7 +300,8 @@ export default function SignerDetailPage() {
                   No vote sessions found
                 </h3>
                 <p className="text-gray-500 mt-1">
-                  This signer hasn't been assigned to any vote sessions yet.
+                  This signer hasn&apos;t been assigned to any vote sessions
+                  yet.
                 </p>
                 <Link
                   href="/supervisor/votes/create"

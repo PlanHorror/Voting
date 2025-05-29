@@ -317,7 +317,7 @@ export default function UserProfilePage() {
                   </p>
                 )}
                 <p className="mt-1 text-xs text-gray-500">
-                  Leave blank if you don't want to change your password
+                  Leave blank if you don&apos;t want to change your password
                 </p>
               </div>
 

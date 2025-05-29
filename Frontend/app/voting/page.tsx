@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { VoteSessionService } from "@/services/vote-session.service";
 import { AuthService } from "@/services/auth.service";
@@ -38,7 +37,10 @@ export default function VotingList() {
         setVoteSessions(data);
 
         // Initialize time remaining for each session
-        const times: Record<string, string> = {};
+        const times: Record<
+          string,
+          { days: number; hours: number; minutes: number } | null
+        > = {};
         data.forEach((session) => {
           times[session.id] = isSessionActive(String(session.endDate))
             ? calculateTimeRemaining(String(session.endDate))
@@ -60,7 +62,10 @@ export default function VotingList() {
   useEffect(() => {
     const interval = setInterval(() => {
       if (voteSessions.length > 0) {
-        const times: Record<string, string> = {};
+        const times: Record<
+          string,
+          { days: number; hours: number; minutes: number } | null
+        > = {};
         voteSessions.forEach((session) => {
           times[session.id] = isSessionActive(String(session.endDate))
             ? calculateTimeRemaining(String(session.endDate))

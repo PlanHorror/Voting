@@ -305,15 +305,65 @@ export default function SupervisorDashboardPage() {
   };
 
   // Calculate participation data for recent sessions
-  const sessionParticipationData = {
+  interface TooltipParams {
+    name: string;
+    data: number;
+  }
+
+  interface SeriesData {
+    name: string;
+    type: string;
+    data: number[];
+    itemStyle: {
+      color: string;
+    };
+  }
+
+  interface SessionParticipationChartData {
+    tooltip: {
+      trigger: string;
+      axisPointer: {
+        type: string;
+      };
+      formatter: (params: TooltipParams[]) => string;
+    };
+    legend: {
+      data: string[];
+    };
+    grid: {
+      left: string;
+      right: string;
+      bottom: string;
+      top: string;
+      containLabel: boolean;
+    };
+    xAxis: {
+      type: string;
+      data: string[];
+      axisLabel: {
+        interval: number;
+        rotate: number;
+        color: string;
+      };
+    };
+    yAxis: {
+      type: string;
+      axisLabel: {
+        color: string;
+      };
+    };
+    series: SeriesData[];
+  }
+
+  const sessionParticipationData: SessionParticipationChartData = {
     tooltip: {
       trigger: "axis",
       axisPointer: { type: "shadow" },
-      formatter: function (params) {
-        const sessionName = params[0].name;
-        const eligible = stats.totalUsers; // All users are eligible
-        const participated = params[1].data; // Participants who got keys
-        const rate = ((participated / eligible) * 100).toFixed(1);
+      formatter: function (params: TooltipParams[]): string {
+        const sessionName: string = params[0].name;
+        const eligible: number = stats.totalUsers; // All users are eligible
+        const participated: number = params[1].data; // Participants who got keys
+        const rate: string = ((participated / eligible) * 100).toFixed(1);
 
         return `${sessionName}<br/>Eligible Users: ${eligible}<br/>Participants: ${participated}<br/>Participation Rate: ${rate}%`;
       },
@@ -332,7 +382,7 @@ export default function SupervisorDashboardPage() {
       type: "category",
       data: recentSessions
         .slice(0, 6)
-        .map((s) =>
+        .map((s: VoteSessionDto): string =>
           s.title.length > 10 ? s.title.substring(0, 10) + "..." : s.title
         ),
       axisLabel: {
@@ -349,7 +399,7 @@ export default function SupervisorDashboardPage() {
       {
         name: "Eligible Users",
         type: "bar",
-        data: recentSessions.slice(0, 6).map(() => stats.totalUsers), // All users are eligible for each session
+        data: recentSessions.slice(0, 6).map((): number => stats.totalUsers), // All users are eligible for each session
         itemStyle: { color: "#93c5fd" },
       },
       {
@@ -357,7 +407,7 @@ export default function SupervisorDashboardPage() {
         type: "bar",
         data: recentSessions
           .slice(0, 6)
-          .map((s) => s.voteParticipants?.length || 0),
+          .map((s: VoteSessionDto): number => s.voteParticipants?.length || 0),
         itemStyle: { color: "#3b82f6" },
       },
     ],

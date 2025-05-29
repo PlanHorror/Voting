@@ -114,7 +114,8 @@ export default function SignerDashboardPage() {
               Welcome, {signerName}
             </h1>
             <p className="text-gray-600 mt-1">
-              Here's an overview of your vote sessions and signing activities
+              Here&apos;s an overview of your vote sessions and signing
+              activities
             </p>
           </div>
         </div>
@@ -407,7 +408,7 @@ export default function SignerDashboardPage() {
                     </p>
                     <div className="mt-2">
                       <Link
-                        href={`/signer/sessions/${session.id}`}
+                        href={`/signer/${session.id}`}
                         className="text-sm text-blue-600 hover:text-blue-800">
                         View detailed results →
                       </Link>

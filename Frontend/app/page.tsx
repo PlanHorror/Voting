@@ -191,7 +191,7 @@ export default function Home() {
                 </h3>
                 <p className="text-gray-600">
                   Voters directly elect representatives to the National Assembly
-                  and People's Councils at all levels.
+                  and People&apos;s Councils at all levels.
                 </p>
               </div>
 
@@ -201,7 +201,7 @@ export default function Home() {
                 </h3>
                 <p className="text-gray-600">
                   Each citizen has one vote of equal value in any election,
-                  following the principle of "one person, one vote."
+                  following the principle of &ldquo;one person, one vote.&rdquo;
                 </p>
               </div>
 
@@ -232,8 +232,8 @@ export default function Home() {
                 </h3>
                 <p className="text-white/90">
                   Our digital voting system preserves traditional values while
-                  bringing security and accessibility to Vietnam's democratic
-                  process.
+                  bringing security and accessibility to Vietnam&apos;s
+                  democratic process.
                 </p>
               </div>
             </motion.div>
@@ -507,8 +507,8 @@ export default function Home() {
                 End-to-End Encryption
               </h3>
               <p className="text-gray-600">
-                All votes are encrypted from the moment they're cast until
-                they're counted, ensuring privacy and preventing tampering.
+                All votes are encrypted from the moment they&apos;re cast until
+                they&apos;re counted, ensuring privacy and preventing tampering.
               </p>
             </motion.div>
 
@@ -652,7 +652,7 @@ export default function Home() {
               variants={fadeInUp}
               className="bg-white p-6 rounded-lg shadow-sm">
               <h3 className="text-xl font-bold text-gray-800 mb-2">
-                Who can vote in Vietnam's elections?
+                Who can vote in Vietnam&apos;s elections?
               </h3>
               <p className="text-gray-600">
                 All Vietnamese citizens aged 18 and above have the right to
@@ -682,8 +682,8 @@ export default function Home() {
               </h3>
               <p className="text-gray-600">
                 You need an account verified with your citizen ID, and a voting
-                key that you'll receive for each specific election you're
-                eligible to participate in.
+                key that you&apos;ll receive for each specific election
+                you&apos;re eligible to participate in.
               </p>
             </motion.div>
 

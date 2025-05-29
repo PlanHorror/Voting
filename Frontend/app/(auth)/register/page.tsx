@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AuthService } from "@/services/auth.service";
 import { Toaster, toast } from "sonner";
+import { AxiosError } from "axios";
 
 export default function RegisterPage() {
   const [citizenId, setCitizenId] = useState("");
@@ -88,10 +89,12 @@ export default function RegisterPage() {
       }, 2000);
     } catch (error: unknown) {
       // Check for specific error status
-      if (error.response && error.response.status === 409) {
-        toast.error("Citizen ID or phone number already exists");
-      } else {
-        toast.error("Registration failed. Please try again later.");
+      if (error instanceof AxiosError) {
+        if (error.response && error.response.status === 409) {
+          toast.error("Citizen ID or phone number already exists");
+        } else {
+          toast.error("Registration failed. Please try again later.");
+        }
       }
     } finally {
       setLoading(false);

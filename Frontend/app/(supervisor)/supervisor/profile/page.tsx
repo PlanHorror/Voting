@@ -7,6 +7,7 @@ import Link from "next/link";
 import { SupervisorService } from "@/services/supervisor.service";
 import { SupervisorUpdateDto } from "@/dto/supervisor.dto";
 import { AxiosError } from "axios";
+import { AuthService } from "@/services/auth.service";
 
 export default function SupervisorProfilePage() {
   const router = useRouter();
@@ -273,7 +274,7 @@ export default function SupervisorProfilePage() {
                   </p>
                 )}
                 <p className="mt-1 text-xs text-gray-500">
-                  Leave blank if you don't want to change your password
+                  Leave blank if you don&apos;t want to change your password
                 </p>
               </div>
 

@@ -10,6 +10,7 @@ import { CandidateCreateDto } from "@/dto/candidate.dto";
 import { SignerDto } from "@/dto/signer.dto"; // Add SignerDto import
 import { AxiosError } from "axios";
 import dayjs from "dayjs";
+import Link from "next/link";
 
 interface CandidateInputProps {
   index: number;
@@ -70,7 +71,7 @@ const CandidateInput = ({
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Description
+          Description*
         </label>
         <textarea
           value={candidate.description}
@@ -83,6 +84,7 @@ const CandidateInput = ({
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Enter candidate description"
           rows={3}
+          required
         />
       </div>
     </div>
@@ -171,12 +173,17 @@ export default function CreateVoteSessionPage() {
     newCandidates[index] = updatedCandidate;
     setCandidates(newCandidates);
 
-    // Clear candidate error if any candidate has a name
-    if (errors.candidates && newCandidates.some((c) => c.name.trim() !== "")) {
-      setErrors({
-        ...errors,
-        candidates: "",
-      });
+    // Clear candidate error if we have at least 2 complete candidates
+    if (errors.candidates) {
+      const completeCandidate = newCandidates.filter(
+        (c) => c.name.trim() !== "" && c.description.trim() !== ""
+      );
+      if (completeCandidate.length >= 2) {
+        setErrors({
+          ...errors,
+          candidates: "",
+        });
+      }
     }
   };
 
@@ -198,25 +205,45 @@ export default function CreateVoteSessionPage() {
     let isValid = true;
     const newErrors = { ...errors };
 
+    // Title validation
     if (!formData.title.trim()) {
       newErrors.title = "Title is required";
       isValid = false;
     }
 
+    // End date validation
     if (!formData.endDate) {
       newErrors.endDate = "End date is required";
       isValid = false;
     }
 
+    // Signer validation
     if (!formData.signerId) {
       newErrors.signerId = "Signer is required";
       isValid = false;
     }
 
-    // Check if at least 2 candidates with names are provided
-    const validCandidates = candidates.filter((c) => c.name.trim() !== "");
+    // Candidates validation - ensure both name and description are provided
+    const validCandidates = candidates.filter(
+      (c) => c.name.trim() !== "" && c.description.trim() !== ""
+    );
+
     if (validCandidates.length < 2) {
-      newErrors.candidates = "At least two named candidates are required";
+      newErrors.candidates =
+        "At least two candidates with both name and description are required";
+      isValid = false;
+    }
+
+    // Check if any candidate has name but missing description or vice versa
+    const incompleteCandidate = candidates.find(
+      (c) =>
+        (c.name.trim() !== "" && c.description.trim() === "") ||
+        (c.name.trim() === "" && c.description.trim() !== "")
+    );
+
+    if (incompleteCandidate) {
+      newErrors.candidates =
+        "All candidates must have both name and description filled";
       isValid = false;
     }
 
@@ -226,6 +253,12 @@ export default function CreateVoteSessionPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Additional validation to ensure no field is empty
+    if (!formData.title.trim() || !formData.endDate || !formData.signerId) {
+      toast.error("All required fields must be filled");
+      return;
+    }
 
     if (!validateForm()) {
       toast.error("Please correct the errors in the form");
@@ -238,6 +271,12 @@ export default function CreateVoteSessionPage() {
       // Get current supervisor ID from auth
       const supervisorId = AuthService.getUserId() || "";
 
+      if (!supervisorId) {
+        toast.error("Authentication error. Please login again.");
+        router.push("/login");
+        return;
+      }
+
       // Format the date from YYYY-MM-DD to MM/DD/YYYY
       const formatDate = (dateString: string): string => {
         const [year, month, day] = dateString.split("-");
@@ -246,18 +285,25 @@ export default function CreateVoteSessionPage() {
 
       // Prepare the vote session data with formatted date
       const voteSessionData = {
-        ...formData,
-        endDate: formatDate(formData.endDate), // Convert to MM/DD/YYYY format
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        endDate: formatDate(formData.endDate),
         supervisorId,
+        signerId: formData.signerId,
       };
 
-      // Filter out empty candidates
+      // Filter and validate candidates - ensure both name and description are provided
       const validCandidates = candidates
-        .filter((c) => c.name.trim() !== "")
+        .filter((c) => c.name.trim() !== "" && c.description.trim() !== "")
         .map((c) => ({
-          name: c.name,
-          description: c.description,
+          name: c.name.trim(),
+          description: c.description.trim(),
         }));
+
+      if (validCandidates.length < 2) {
+        toast.error("At least two complete candidates are required");
+        return;
+      }
 
       // Create the vote session with candidates
       await VoteSessionService.createVoteSessionWithCandidates(
@@ -332,7 +378,8 @@ export default function CreateVoteSessionPage() {
             <div className="ml-3">
               <p className="text-sm text-blue-700">
                 Create a new vote session by filling out all required fields.
-                You must add at least two candidates.
+                You must add at least two candidates with both name and
+                description.
               </p>
             </div>
           </div>
@@ -440,9 +487,9 @@ export default function CreateVoteSessionPage() {
               {signers.length === 0 && !loadingSigners && (
                 <p className="mt-1 text-xs text-yellow-600">
                   No signers found. Please{" "}
-                  <a href="/supervisor/signers" className="underline">
+                  <Link href="/supervisor/signers" className="underline">
                     create a signer
-                  </a>{" "}
+                  </Link>{" "}
                   first.
                 </p>
               )}

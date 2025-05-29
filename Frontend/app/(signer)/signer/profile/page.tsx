@@ -60,7 +60,7 @@ export default function SignerProfilePage() {
           new_password: "",
           confirm_password: "",
         });
-      } catch (error) {
+      } catch {
         toast.error("Failed to load your profile");
       } finally {
         setLoading(false);
@@ -355,7 +355,7 @@ export default function SignerProfilePage() {
                   </p>
                 )}
                 <p className="mt-1 text-xs text-gray-500">
-                  Leave blank if you don't want to change your password
+                  Leave blank if you don&apos;t want to change your password
                 </p>
               </div>
 

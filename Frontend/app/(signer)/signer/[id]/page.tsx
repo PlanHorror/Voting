@@ -68,7 +68,7 @@ export default function VoteSessionDetailPage() {
     });
 
     // Build cumulative vote counts
-    votesByHour.forEach((count, date) => {
+    votesByHour.forEach((count) => {
       cumulativeCount += count;
       voteCounts.push(cumulativeCount);
     });
