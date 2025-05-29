@@ -1,5 +1,5 @@
 import axios from "axios";
-import { SignerCreateDto, SignerDto } from "@/dto/signer.dto";
+import { SignerCreateDto, SignerDto, SignerUpdateDto } from "@/dto/signer.dto";
 import { AuthService } from "./auth.service";
 import { VoteSessionDto } from "@/dto/vote-session.dto";
 
@@ -50,7 +50,7 @@ export class SignerService {
   static async getSignerById(id: string): Promise<SignerDto> {
     try {
       const response = await axios.get<SignerDto>(
-        `${this.BACKEND_URL}/signer/${id}`,
+        `${this.BACKEND_URL}/signer/find/${id}`,
         {
           headers: this.getAuthHeader(),
         }
@@ -78,6 +78,27 @@ export class SignerService {
       );
       return response.data;
     } catch (error: unknown) {
+      throw error;
+    }
+  }
+
+  /**
+   * Update a signer profile
+   * @param signerData The data for updating the signer
+   * @returns Promise with the updated signer
+   */
+  static async updateSigner(signerData: SignerUpdateDto): Promise<SignerDto> {
+    try {
+      const response = await axios.put<SignerDto>(
+        `${this.BACKEND_URL}/signer`,
+        signerData,
+        {
+          headers: this.getAuthHeader(),
+        }
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error("Error updating signer:", error);
       throw error;
     }
   }

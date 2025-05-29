@@ -41,6 +41,17 @@ export default function NavBar() {
     router.push("/");
   };
 
+  // Determine the profile link based on user role
+  const getProfileLink = () => {
+    if (userRole === Role.SUPERVISOR.toString()) {
+      return "/supervisor/profile";
+    } else if (userRole === Role.SIGNER.toString()) {
+      return "/signer/profile";
+    } else {
+      return "/profile";
+    }
+  };
+
   return (
     <div className="w-full mb-10">
       <Toaster position="top-right" richColors />
@@ -50,7 +61,7 @@ export default function NavBar() {
         </div>
 
         <div className="flex justify-center space-x-8 text-lg font-medium w-3/5">
-          {userRole === Role.SUPERVISOR.toString() ? (
+          {userRole === Role.SUPERVISOR.toString() && (
             // Supervisor Navigation Links
             <>
               <Link
@@ -74,31 +85,43 @@ export default function NavBar() {
                 Signers
               </Link>
             </>
-          ) : (
-            // Regular User Navigation Links
-            <>
-              <Link
-                href="/"
-                className="text-indigo-500 hover:text-blue-500 px-3 py-2">
-                Home
-              </Link>
-              <Link
-                href="/votes"
-                className="text-gray-900 hover:text-blue-500 px-3 py-2">
-                List votes
-              </Link>
-              <Link
-                href="/voting"
-                className="text-gray-900 hover:text-blue-500 px-3 py-2">
-                Voting
-              </Link>
-              <Link
-                href="/result"
-                className="text-gray-900 hover:text-blue-500 px-3 py-2">
-                Result
-              </Link>
-            </>
           )}
+
+          {userRole === Role.SIGNER.toString() && (
+            // Signer Navigation Links - simplified as requested
+            <Link
+              href="/signer"
+              className="text-indigo-500 hover:text-blue-500 px-3 py-2">
+              Dashboard
+            </Link>
+          )}
+
+          {userRole !== Role.SIGNER.toString() &&
+            userRole !== Role.SUPERVISOR.toString() && (
+              // Regular User Navigation Links
+              <>
+                <Link
+                  href="/"
+                  className="text-indigo-500 hover:text-blue-500 px-3 py-2">
+                  Home
+                </Link>
+                <Link
+                  href="/votes"
+                  className="text-gray-900 hover:text-blue-500 px-3 py-2">
+                  List votes
+                </Link>
+                <Link
+                  href="/voting"
+                  className="text-gray-900 hover:text-blue-500 px-3 py-2">
+                  Voting
+                </Link>
+                <Link
+                  href="/result"
+                  className="text-gray-900 hover:text-blue-500 px-3 py-2">
+                  Result
+                </Link>
+              </>
+            )}
         </div>
 
         <div className="flex justify-end items-center space-x-4">
@@ -118,7 +141,7 @@ export default function NavBar() {
           ) : (
             <>
               <Link
-                href={`/profile`}
+                href={getProfileLink()}
                 className="px-5 py-2 border border-indigo-500 text-indigo-500 font-medium rounded-md hover:bg-indigo-500 hover:text-white transition-colors">
                 Profile
               </Link>

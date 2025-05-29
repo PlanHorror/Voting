@@ -4,12 +4,11 @@ import React, { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { toast, Toaster } from "sonner";
 import Link from "next/link";
-import { SignerService } from "@/services/signer.service";
-import { SignerUpdateDto } from "@/dto/signer.dto";
+import { SupervisorService } from "@/services/supervisor.service";
+import { SupervisorUpdateDto } from "@/dto/supervisor.dto";
 import { AxiosError } from "axios";
-import { AuthService } from "@/services/auth.service";
 
-export default function SignerProfilePage() {
+export default function SupervisorProfilePage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -19,15 +18,11 @@ export default function SignerProfilePage() {
   // Form data
   const [formData, setFormData] = useState<{
     username: string;
-    email: string;
-    phone: string;
     old_password: string;
     new_password: string;
     confirm_password: string;
   }>({
     username: "",
-    email: "",
-    phone: "",
     old_password: "",
     new_password: "",
     confirm_password: "",
@@ -36,38 +31,36 @@ export default function SignerProfilePage() {
   // Form errors
   const [errors, setErrors] = useState({
     username: "",
-    email: "",
-    phone: "",
     old_password: "",
     new_password: "",
     confirm_password: "",
     general: "",
   });
 
-  // Fetch current signer data
+  // Fetch current supervisor data
   useEffect(() => {
-    const fetchSignerProfile = async () => {
+    const fetchSupervisorProfile = async () => {
       try {
         setLoading(true);
-        const profile = await SignerService.getSignerProfile();
+        // We'll need to implement this method in SupervisorService if it doesn't exist yet
+        const profile = await SupervisorService.getSupervisorProfile();
 
         // Initialize form with current data
         setFormData({
           username: profile.username || "",
-          email: profile.email || "",
-          phone: profile.phone || "",
           old_password: "",
           new_password: "",
           confirm_password: "",
         });
       } catch (error) {
+        console.error("Error fetching profile:", error);
         toast.error("Failed to load your profile");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchSignerProfile();
+    fetchSupervisorProfile();
   }, []);
 
   // Check if password fields should be shown
@@ -95,8 +88,6 @@ export default function SignerProfilePage() {
     let isValid = true;
     const newErrors = {
       username: "",
-      email: "",
-      phone: "",
       old_password: "",
       new_password: "",
       confirm_password: "",
@@ -109,25 +100,6 @@ export default function SignerProfilePage() {
       isValid = false;
     } else if (formData.username.length < 3) {
       newErrors.username = "Username must be at least 3 characters";
-      isValid = false;
-    }
-
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-      isValid = false;
-    } else if (!emailRegex.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
-      isValid = false;
-    }
-
-    // Phone validation
-    if (!formData.phone.trim()) {
-      newErrors.phone = "Phone is required";
-      isValid = false;
-    } else if (!/^0\d{9}$/.test(formData.phone)) {
-      newErrors.phone = "Phone must be 10 digits starting with 0";
       isValid = false;
     }
 
@@ -171,10 +143,8 @@ export default function SignerProfilePage() {
 
     try {
       // Create update DTO
-      const updateData: SignerUpdateDto = {
+      const updateData: SupervisorUpdateDto = {
         username: formData.username,
-        email: formData.email,
-        phone: formData.phone,
       };
 
       // Only add password fields if old_password is provided
@@ -184,7 +154,7 @@ export default function SignerProfilePage() {
         updateData.confirm_password = formData.confirm_password;
       }
 
-      await SignerService.updateSigner(updateData);
+      await SupervisorService.updateSupervisor(updateData);
       toast.success("Profile updated successfully!");
 
       // Get user role and redirect accordingly
@@ -199,16 +169,13 @@ export default function SignerProfilePage() {
         }
       }, 1000); // Short delay to show the success message
     } catch (error) {
-      console.error("Error updating profile:", error);
       if (error instanceof AxiosError) {
         if (error.response?.status === 400) {
           toast.error("Invalid form data. Please check your inputs.");
         } else if (error.response?.status === 401) {
           toast.error("Incorrect current password");
         } else if (error.response?.status === 409) {
-          toast.error(
-            "This username, email, or phone number is already in use."
-          );
+          toast.error("This username is already taken");
         } else {
           toast.error("Failed to update profile. Please try again.");
         }
@@ -237,7 +204,7 @@ export default function SignerProfilePage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-800">My Profile</h1>
           <p className="text-gray-600 mt-1">
-            Update your personal information and password
+            Update your supervisor account information and password
           </p>
         </div>
       </div>
@@ -267,55 +234,6 @@ export default function SignerProfilePage() {
               {errors.username && (
                 <p className="mt-1 text-xs text-red-500">{errors.username}</p>
               )}
-            </div>
-
-            {/* Email Field */}
-            <div className="mb-6">
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-1">
-                Email Address*
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                className={`w-full px-3 py-2 border ${
-                  errors.email ? "border-red-500" : "border-gray-300"
-                } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                placeholder="Enter email address"
-              />
-              {errors.email && (
-                <p className="mt-1 text-xs text-red-500">{errors.email}</p>
-              )}
-            </div>
-
-            {/* Phone Field */}
-            <div className="mb-6">
-              <label
-                htmlFor="phone"
-                className="block text-sm font-medium text-gray-700 mb-1">
-                Phone Number*
-              </label>
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                value={formData.phone}
-                onChange={handleInputChange}
-                className={`w-full px-3 py-2 border ${
-                  errors.phone ? "border-red-500" : "border-gray-300"
-                } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                placeholder="Enter 10-digit phone number"
-              />
-              {errors.phone && (
-                <p className="mt-1 text-xs text-red-500">{errors.phone}</p>
-              )}
-              <p className="mt-1 text-xs text-gray-500">
-                Format: 0XXXXXXXXX (10 digits starting with 0)
-              </p>
             </div>
 
             <div className="border-t border-gray-200 my-6 pt-6">
@@ -434,7 +352,7 @@ export default function SignerProfilePage() {
             {/* Form Actions */}
             <div className="flex justify-end space-x-3 pt-4 mt-6 border-t border-gray-200">
               <Link
-                href="/signer"
+                href="/supervisor"
                 className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors">
                 Cancel
               </Link>
@@ -470,11 +388,11 @@ export default function SignerProfilePage() {
         </div>
       </div>
 
-      <div className="mt-6 bg-blue-50 rounded-lg p-4 border border-blue-200">
+      <div className="mt-6 bg-yellow-50 rounded-lg p-4 border border-yellow-200">
         <div className="flex items-start">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 text-blue-500 mr-2 mt-0.5"
+            className="h-5 w-5 text-yellow-500 mr-2 mt-0.5"
             viewBox="0 0 20 20"
             fill="currentColor">
             <path
@@ -484,11 +402,13 @@ export default function SignerProfilePage() {
             />
           </svg>
           <div>
-            <h3 className="text-sm font-medium text-blue-800">Security Note</h3>
-            <p className="text-xs text-blue-600 mt-1">
-              As a signer, your account information is used for authentication
-              and verification. Please ensure your contact information is up to
-              date.
+            <h3 className="text-sm font-medium text-yellow-800">
+              Security Note
+            </h3>
+            <p className="text-xs text-yellow-600 mt-1">
+              As a supervisor, you have administrative access to the voting
+              system. Any changes to your account information require strict
+              verification. Please ensure your password is strong and secure.
             </p>
           </div>
         </div>

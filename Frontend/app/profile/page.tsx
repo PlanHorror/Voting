@@ -4,12 +4,12 @@ import React, { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { toast, Toaster } from "sonner";
 import Link from "next/link";
-import { SignerService } from "@/services/signer.service";
-import { SignerUpdateDto } from "@/dto/signer.dto";
+import { UserService } from "@/services/user.service";
+import { UserUpdateDto } from "@/dto/auth.dto";
 import { AxiosError } from "axios";
 import { AuthService } from "@/services/auth.service";
 
-export default function SignerProfilePage() {
+export default function UserProfilePage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -18,15 +18,13 @@ export default function SignerProfilePage() {
 
   // Form data
   const [formData, setFormData] = useState<{
-    username: string;
-    email: string;
+    citizenId: string;
     phone: string;
     old_password: string;
     new_password: string;
     confirm_password: string;
   }>({
-    username: "",
-    email: "",
+    citizenId: "",
     phone: "",
     old_password: "",
     new_password: "",
@@ -35,8 +33,7 @@ export default function SignerProfilePage() {
 
   // Form errors
   const [errors, setErrors] = useState({
-    username: "",
-    email: "",
+    citizenId: "",
     phone: "",
     old_password: "",
     new_password: "",
@@ -44,30 +41,30 @@ export default function SignerProfilePage() {
     general: "",
   });
 
-  // Fetch current signer data
+  // Fetch current user data
   useEffect(() => {
-    const fetchSignerProfile = async () => {
+    const fetchUserProfile = async () => {
       try {
         setLoading(true);
-        const profile = await SignerService.getSignerProfile();
+        const profile = await UserService.getUserProfile();
 
         // Initialize form with current data
         setFormData({
-          username: profile.username || "",
-          email: profile.email || "",
+          citizenId: profile.citizenId || "",
           phone: profile.phone || "",
           old_password: "",
           new_password: "",
           confirm_password: "",
         });
       } catch (error) {
+        console.error("Error fetching profile:", error);
         toast.error("Failed to load your profile");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchSignerProfile();
+    fetchUserProfile();
   }, []);
 
   // Check if password fields should be shown
@@ -94,8 +91,7 @@ export default function SignerProfilePage() {
   const validateForm = (): boolean => {
     let isValid = true;
     const newErrors = {
-      username: "",
-      email: "",
+      citizenId: "",
       phone: "",
       old_password: "",
       new_password: "",
@@ -103,22 +99,12 @@ export default function SignerProfilePage() {
       general: "",
     };
 
-    // Username validation
-    if (!formData.username.trim()) {
-      newErrors.username = "Username is required";
+    // Citizen ID validation (13 digits for Thai ID)
+    if (!formData.citizenId.trim()) {
+      newErrors.citizenId = "Citizen ID is required";
       isValid = false;
-    } else if (formData.username.length < 3) {
-      newErrors.username = "Username must be at least 3 characters";
-      isValid = false;
-    }
-
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-      isValid = false;
-    } else if (!emailRegex.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
+    } else if (!/^\d{13}$/.test(formData.citizenId)) {
+      newErrors.citizenId = "Citizen ID must be 13 digits";
       isValid = false;
     }
 
@@ -171,9 +157,8 @@ export default function SignerProfilePage() {
 
     try {
       // Create update DTO
-      const updateData: SignerUpdateDto = {
-        username: formData.username,
-        email: formData.email,
+      const updateData: UserUpdateDto = {
+        citizenId: formData.citizenId,
         phone: formData.phone,
       };
 
@@ -184,7 +169,7 @@ export default function SignerProfilePage() {
         updateData.confirm_password = formData.confirm_password;
       }
 
-      await SignerService.updateSigner(updateData);
+      await UserService.updateUser(updateData);
       toast.success("Profile updated successfully!");
 
       // Get user role and redirect accordingly
@@ -199,16 +184,13 @@ export default function SignerProfilePage() {
         }
       }, 1000); // Short delay to show the success message
     } catch (error) {
-      console.error("Error updating profile:", error);
       if (error instanceof AxiosError) {
         if (error.response?.status === 400) {
           toast.error("Invalid form data. Please check your inputs.");
         } else if (error.response?.status === 401) {
           toast.error("Incorrect current password");
         } else if (error.response?.status === 409) {
-          toast.error(
-            "This username, email, or phone number is already in use."
-          );
+          toast.error("This citizen ID or phone number is already in use.");
         } else {
           toast.error("Failed to update profile. Please try again.");
         }
@@ -246,50 +228,30 @@ export default function SignerProfilePage() {
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         <div className="p-6">
           <form onSubmit={handleSubmit}>
-            {/* Username Field */}
+            {/* Citizen ID Field */}
             <div className="mb-6">
               <label
-                htmlFor="username"
+                htmlFor="citizenId"
                 className="block text-sm font-medium text-gray-700 mb-1">
-                Username*
+                Citizen ID*
               </label>
               <input
                 type="text"
-                id="username"
-                name="username"
-                value={formData.username}
+                id="citizenId"
+                name="citizenId"
+                value={formData.citizenId}
                 onChange={handleInputChange}
                 className={`w-full px-3 py-2 border ${
-                  errors.username ? "border-red-500" : "border-gray-300"
+                  errors.citizenId ? "border-red-500" : "border-gray-300"
                 } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                placeholder="Enter username"
+                placeholder="Enter 13-digit citizen ID"
               />
-              {errors.username && (
-                <p className="mt-1 text-xs text-red-500">{errors.username}</p>
+              {errors.citizenId && (
+                <p className="mt-1 text-xs text-red-500">{errors.citizenId}</p>
               )}
-            </div>
-
-            {/* Email Field */}
-            <div className="mb-6">
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-1">
-                Email Address*
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                className={`w-full px-3 py-2 border ${
-                  errors.email ? "border-red-500" : "border-gray-300"
-                } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                placeholder="Enter email address"
-              />
-              {errors.email && (
-                <p className="mt-1 text-xs text-red-500">{errors.email}</p>
-              )}
+              <p className="mt-1 text-xs text-gray-500">
+                Your 13-digit Thai citizen ID
+              </p>
             </div>
 
             {/* Phone Field */}
@@ -434,7 +396,7 @@ export default function SignerProfilePage() {
             {/* Form Actions */}
             <div className="flex justify-end space-x-3 pt-4 mt-6 border-t border-gray-200">
               <Link
-                href="/signer"
+                href="/"
                 className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors">
                 Cancel
               </Link>
@@ -470,11 +432,11 @@ export default function SignerProfilePage() {
         </div>
       </div>
 
-      <div className="mt-6 bg-blue-50 rounded-lg p-4 border border-blue-200">
+      <div className="mt-6 bg-green-50 rounded-lg p-4 border border-green-200">
         <div className="flex items-start">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 text-blue-500 mr-2 mt-0.5"
+            className="h-5 w-5 text-green-500 mr-2 mt-0.5"
             viewBox="0 0 20 20"
             fill="currentColor">
             <path
@@ -484,11 +446,12 @@ export default function SignerProfilePage() {
             />
           </svg>
           <div>
-            <h3 className="text-sm font-medium text-blue-800">Security Note</h3>
-            <p className="text-xs text-blue-600 mt-1">
-              As a signer, your account information is used for authentication
-              and verification. Please ensure your contact information is up to
-              date.
+            <h3 className="text-sm font-medium text-green-800">
+              Account Security
+            </h3>
+            <p className="text-xs text-green-600 mt-1">
+              Keeping your contact information up to date ensures you receive
+              important notifications about your account and voting activities.
             </p>
           </div>
         </div>

@@ -22,3 +22,12 @@ export interface SignerCreateDto {
   phone: string;
   password: string;
 }
+
+export interface SignerUpdateDto {
+  username: string;
+  email: string;
+  phone: string;
+  old_password?: string;
+  new_password?: string;
+  confirm_password?: string;
+}

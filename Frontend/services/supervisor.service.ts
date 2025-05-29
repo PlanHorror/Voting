@@ -3,7 +3,11 @@ import { AuthService } from "./auth.service";
 import { StatsDto } from "../dto/stats.dto";
 import { AccountDistributionDto } from "@/dto/account-distribution.dto";
 import { VoteSessionDistributionDto } from "../dto/vote-session-distribution.dto";
-import { SupervisorCreateDto, SupervisorDto } from "@/dto/supervisor.dto";
+import {
+  SupervisorCreateDto,
+  SupervisorDto,
+  SupervisorUpdateDto,
+} from "@/dto/supervisor.dto";
 
 // Define the shape of the MonthlySessionDto
 interface MonthlySessionDto {
@@ -144,6 +148,48 @@ export class SupervisorService {
       return response.data;
     } catch (error: unknown) {
       console.error("Error creating supervisor:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update a supervisor profile
+   * @param supervisorData The data for updating the supervisor
+   * @returns Promise with the updated supervisor
+   */
+  static async updateSupervisor(
+    supervisorData: SupervisorUpdateDto
+  ): Promise<SupervisorDto> {
+    try {
+      const response = await axios.put<SupervisorDto>(
+        `${this.BACKEND_URL}/supervisor`,
+        supervisorData,
+        {
+          headers: this.getAuthHeader(),
+        }
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error("Error updating supervisor:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get current supervisor profile
+   * @returns Promise with the supervisor profile
+   */
+  static async getSupervisorProfile(): Promise<SupervisorDto> {
+    try {
+      const response = await axios.get<SupervisorDto>(
+        `${this.BACKEND_URL}/supervisor/profile`,
+        {
+          headers: this.getAuthHeader(),
+        }
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error("Error fetching supervisor profile:", error);
       throw error;
     }
   }
