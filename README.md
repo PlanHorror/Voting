@@ -1,4 +1,4 @@
-# What is Malware - Secure Digital Voting System
+#  Secure Digital Voting System
 
 A comprehensive digital voting platform that implements cryptographic security measures to ensure vote integrity, anonymity, and transparency in electronic elections.
 
